@@ -1,23 +1,22 @@
 {
-  "name": "inventory-api",
-  "version": "1.0.0",
-  "type": "module",
+  "name": "my-digital-platform-frontend",
+  "version": "0.0.1",
+  "private": true,
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "jest --runInBand"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1",
-    "xlsx": "^0.18.5",
-    "mongoose": "^6.9.1",
-    "dotenv": "^16.0.3"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9",
-    "jest": "^29.6.1",
-    "supertest": "^6.3.3"
+    "vite": "^5.4.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "tailwindcss": "^3.4.10",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47"
   }
 }

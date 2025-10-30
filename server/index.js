@@ -74,11 +74,11 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ ok: false, error: 'empty or invalid excel' });
     }
 
-    // Intentamos mapear usando la primera hoja predominante (agrupamos por sheet)
+
     const firstSheet = rows[0].sheet;
     const sheetRows = rows.filter(r => r.sheet === firstSheet).map(r => r.data);
 
-    // Mapea filas a nuestro modelo (adecúa nombres de columnas que usas)
+    // Mapea filas a nuestro modelo
     products = sheetRows.map((r, idx) => {
       const id = r["ID"] ?? r["Id"] ?? r["id"] ?? `row_${idx + 2}`;
       const nombre = r["Nombre Producto"] ?? r["Nombre"] ?? r["Producto"] ?? '';
