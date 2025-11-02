@@ -1,11 +1,61 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import ExcelJS from 'exceljs';
+import mongoose from 'mongoose';
+import authRoutes from './routes/auth.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+import importRoutes from './routes/import.routes.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Conectar a MongoDB
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/tracelink';
+
+// Configuración de conexión
+const mongooseOptions = {
+  serverSelectionTimeoutMS: 5000, // Timeout de 5 segundos
+  socketTimeoutMS: 45000,
+};
+
+// Ocultar contraseña en logs
+const getLogURI = (uri) => {
+  if (uri.includes('@')) {
+    return uri.replace(/:[^:@]+@/, ':****@'); // Oculta contraseña
+  }
+  return uri;
+};
+
+mongoose.connect(MONGODB_URI, mongooseOptions)
+  .then(() => {
+    console.log('✅ MongoDB conectado exitosamente');
+    console.log('📍 Base de datos:', mongoose.connection.name);
+    console.log('🔗 Host:', mongoose.connection.host);
+    console.log('📊 Estado:', mongoose.connection.readyState === 1 ? 'Conectado' : 'Desconectado');
+  })
+  .catch(err => {
+    console.error('❌ Error conectando MongoDB:');
+    console.error('🔗 URI (sin contraseña):', getLogURI(MONGODB_URI));
+    console.error('📝 Error:', err.message);
+    console.error('\n💡 Verifica:');
+    console.error('   1. Que MONGODB_URI en .env sea correcto');
+    console.error('   2. Que la contraseña sea correcta');
+    console.error('   3. Que tu IP esté en la whitelist de MongoDB Atlas');
+    console.error('   4. Que la red permita conexiones a MongoDB Atlas');
+    process.exit(1); // Salir si no puede conectar
+  });
+
+// Manejar eventos de conexión
+mongoose.connection.on('disconnected', () => {
+  console.warn('⚠️ MongoDB desconectado');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ Error en MongoDB:', err);
+});
 
 // Multer en memoria con límite 10MB
 const upload = multer({
@@ -127,8 +177,45 @@ app.get('/api/alerts', (req, res) => {
   res.json(alerts);
 });
 
-// Healthcheck simple
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+// Healthcheck con estado de MongoDB
+app.get('/api/health', (req, res) => {
+  const dbState = mongoose.connection.readyState;
+  const states = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting'
+  };
+  
+  res.json({
+    ok: dbState === 1,
+    mongodb: {
+      status: states[dbState] || 'unknown',
+      connected: dbState === 1,
+      database: mongoose.connection.name,
+      host: mongoose.connection.host
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Rutas de autenticación
+app.use('/api/auth', authRoutes);
+
+// Rutas de administración
+app.use('/api/admin', adminRoutes);
+
+// Rutas de importación (nueva arquitectura)
+app.use('/api/imports', importRoutes);
+
+// Rutas legacy (a deprecar): mantener para retrocompatibilidad
+app.get('/api/products', (req, res) => {
+  res.json(products || []);
+});
+
+app.get('/api/alerts', (req, res) => {
+  res.json(alerts || []);
+});
 
 // Levanta el servidor en el puerto 3001
 const PORT = process.env.PORT || 3001;

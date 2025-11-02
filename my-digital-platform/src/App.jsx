@@ -8,7 +8,7 @@ import DataTable from './pages/DataTable';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
-import { DataProvider } from './context/DataContext';
+import { DataProvider } from './context/DataProvider';
 import { setAuthToken } from './services/api';
 
 function parseToken(token) {

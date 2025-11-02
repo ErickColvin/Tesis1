@@ -1,0 +1,20 @@
+Arquitectura y estructura
+Frontend
+Stack: React 18, Vite, React Router, Tailwind.
+Configs:
+vite.config.mjs (ESM), proxy /api → http://localhost:3001, alias @ → /src.
+postcss.config.mjs (ESM), tailwind.config.js.
+Rutas/páginas (base): Home, ImportExcel, DataTable, Register, Login, AdminDashboard.
+Auth: JWT en localStorage, setAuthToken en api.js.
+Estilos: src/index.css o src/styles/globals.css con @tailwind base/components/utilities.
+Backend
+Stack: Node 18+ ESM ("type":"module"), Express, Mongoose, Multer, XLSX, dotenv, CORS.
+.env (ejemplo):"PORT=3001
+MONGO_URI=mongodb://localhost:27017/tracelink
+JWT_SECRET=change_me
+CLIENT_ORIGIN=http://localhost:3000"
+
+
+---
+alwaysApply: true
+---

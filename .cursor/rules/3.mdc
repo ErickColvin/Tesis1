@@ -1,0 +1,16 @@
+Estándares de calidad
+Rendimiento (presupuestos)
+Búsquedas: p95 < 1s.
+Listados con filtros/paginación: p95 < 2s.
+Definición p95: percentil 95 del tiempo de respuesta medido en N peticiones; incluir tabla de resultados cuando se cambien índices.
+Seguridad
+Sanitiza inputs, valida esquemas, controla roles en endpoints críticos.
+CORS: permite solo CLIENT_ORIGIN.
+No imprimas secretos/paths sensibles en logs.
+Mantenibilidad
+Código modular, funciones puras cuando sea posible.
+Manejo de errores consistente (HTTP codes + message claro).
+No introducir dependencias si no aportan valor claro.
+---
+alwaysApply: true
+---

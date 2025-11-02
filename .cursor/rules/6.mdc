@@ -1,0 +1,47 @@
+Tareas típicas (plantillas que Cursor debe seguir)
+6.1 Importación Excel (Épica 1)
+
+Backend:
+
+Endpoint POST /api/imports con multer.
+
+Servicio: parse xlsx → validar filas → construir report → upsert products/packages.
+
+Guardar imports con resumen.
+
+Tests: unit (validador), integración (supertest con fixture).
+
+Frontend:
+
+Página ImportExcel con upload y tabla de resultados.
+
+Mostrar rowsOk, rowsError y detalle.
+
+6.2 Alertas (Épica 2)
+
+Trigger en cambios de stock → si stock ≤ minStock → crear/actualizar alerta.
+
+Endpoints: GET /api/alerts, PATCH /api/alerts/:id/resolve.
+
+UI: bandeja de alertas.
+
+6.3 Trazabilidad (Épica 3)
+
+PATCH /api/packages/:code/state con transiciones válidas y location.
+
+Registrar events de timeline.
+
+6.4 Búsqueda + paginación (Épica 4)
+
+Filtros por SKU/código/estado/ubicación/fecha.
+
+Asegurar índices; medir p95.
+
+6.5 KPIs (Épica 5)
+
+GET /api/kpis: exactitud, quiebres, tiempos.
+
+UI: tarjetas/resumen.
+---
+alwaysApply: true
+---
