@@ -130,7 +130,7 @@ export default function Register() {
                   className="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors"
                   tabIndex={-1}
                 >
-                  {showPassword ? '❌' : '👁️'}
+                  {showPassword ? '🙈' : '👁️'}
                 </button>
               </div>
               <p className="text-xs text-gray-400">Mínimo 6 caracteres</p>
@@ -161,7 +161,7 @@ export default function Register() {
                   className="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors"
                   tabIndex={-1}
                 >
-                  {showConfirmPassword ? '❌' : '👁️'}
+                  {showConfirmPassword ? '🙈' : '👁️'}
                 </button>
               </div>
             </div>
