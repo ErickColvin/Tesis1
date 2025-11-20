@@ -1,6 +1,7 @@
 import User from '../models/user.model.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secretdev';
 const JWT_EXPIRES = '7d';
@@ -8,6 +9,12 @@ const SALT_ROUNDS = 10;
 
 export async function register(req, res) {
   try {
+    // Verificar conexión a MongoDB
+    if (mongoose.connection.readyState !== 1) {
+      console.error('MongoDB no está conectado. Estado:', mongoose.connection.readyState);
+      return res.status(503).json({ message: 'Base de datos no disponible. Por favor intenta más tarde.' });
+    }
+
     const { email, password } = req.body;
     
     // Validaciones básicas
@@ -45,19 +52,35 @@ export async function register(req, res) {
       message: 'Usuario creado exitosamente'
     });
   } catch (err) {
-    console.error('register error', err);
+    console.error('register error:', err);
+    console.error('Error details:', {
+      name: err.name,
+      message: err.message,
+      code: err.code,
+      stack: err.stack
+    });
     
     // Manejar errores de validación de Mongoose
     if (err.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Datos de entrada inválidos' });
+      const messages = Object.values(err.errors).map(e => e.message).join(', ');
+      return res.status(400).json({ message: `Datos de entrada inválidos: ${messages}` });
     }
     
     // Manejar errores de duplicados
     if (err.code === 11000) {
       return res.status(409).json({ message: 'Este email ya está registrado' });
     }
+
+    // Error de conexión a MongoDB
+    if (err.name === 'MongooseError' || err.message?.includes('connection')) {
+      return res.status(503).json({ message: 'Error de conexión a la base de datos. Intenta nuevamente.' });
+    }
     
-    return res.status(500).json({ message: 'Error interno del servidor' });
+    // Retornar mensaje de error más específico
+    return res.status(500).json({ 
+      message: 'Error interno del servidor',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 }
 

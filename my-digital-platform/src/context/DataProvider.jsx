@@ -11,10 +11,12 @@ export const DataProvider = ({ children }) => {
       try {
         const [pRes, aRes] = await Promise.all([
           fetch('/api/products'),
-          fetch('/api/alerts'),
+          fetch('/api/alerts?status=active'),
         ]);
-        setProducts(await pRes.json());
-        setAlerts(await aRes.json());
+        const productsData = await pRes.json();
+        const alertsData = await aRes.json();
+        setProducts(productsData.items || productsData || []);
+        setAlerts(alertsData.alerts || alertsData || []);
       } catch (err) {
         console.error('Fetch inicial:', err);
       }
@@ -31,10 +33,14 @@ export const DataProvider = ({ children }) => {
       });
       if (!res.ok) throw new Error(`Status ${res.status}`);
       // refresca datos
-      const productsData = await (await fetch('/api/products')).json();
-      const alertsData   = await (await fetch('/api/alerts')).json();
-      setProducts(productsData);
-      setAlerts(alertsData);
+      const [productsRes, alertsRes] = await Promise.all([
+        fetch('/api/products'),
+        fetch('/api/alerts?status=active')
+      ]);
+      const productsData = await productsRes.json();
+      const alertsData = await alertsRes.json();
+      setProducts(productsData.items || productsData || []);
+      setAlerts(alertsData.alerts || alertsData || []);
       return true;
     } catch (err) {
       console.error('uploadExcel error:', err);

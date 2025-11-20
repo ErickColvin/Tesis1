@@ -8,6 +8,8 @@ import DataTable from './pages/DataTable';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
+import Trazabilidad from './pages/Trazabilidad';
+import AddDelivery from './pages/AddDelivery';
 import { DataProvider } from './context/DataProvider';
 import { setAuthToken } from './services/api';
 
@@ -84,6 +86,9 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/import" element={<ImportExcel />} />
             <Route path="/data" element={<DataTable />} />
+            <Route path="/products" element={<DataTable />} />
+            <Route path="/trazabilidad" element={<Trazabilidad />} />
+            <Route path="/add-delivery" element={<AddDelivery />} />
             <Route path="/register" element={<Navigate to="/" replace />} />
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route

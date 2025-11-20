@@ -7,6 +7,9 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/auth.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import importRoutes from './routes/import.routes.js';
+import deliveryRoutes from './routes/delivery.routes.js';
+import productRoutes from './routes/product.routes.js';
+import alertRoutes from './routes/alert.routes.js';
 
 const app = express();
 app.use(cors());
@@ -167,15 +170,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-/** GET /api/products → lista de productos */
-app.get('/api/products', (req, res) => {
-  res.json(products);
-});
-
-/** GET /api/alerts → lista de alertas */
-app.get('/api/alerts', (req, res) => {
-  res.json(alerts);
-});
+// Rutas de productos y alertas ahora están en sus respectivos routers
 
 // Healthcheck con estado de MongoDB
 app.get('/api/health', (req, res) => {
@@ -208,13 +203,19 @@ app.use('/api/admin', adminRoutes);
 // Rutas de importación (nueva arquitectura)
 app.use('/api/imports', importRoutes);
 
-// Rutas legacy (a deprecar): mantener para retrocompatibilidad
-app.get('/api/products', (req, res) => {
-  res.json(products || []);
-});
+// Rutas de deliveries/trazabilidad
+app.use('/api/deliveries', deliveryRoutes);
 
-app.get('/api/alerts', (req, res) => {
-  res.json(alerts || []);
+// Rutas de productos
+app.use('/api/products', productRoutes);
+
+// Rutas de alertas
+app.use('/api/alerts', alertRoutes);
+
+// Rutas legacy (a deprecar): mantener para retrocompatibilidad
+// Mantener por compatibilidad con código antiguo
+app.get('/api/products-legacy', (req, res) => {
+  res.json(products || []);
 });
 
 // Levanta el servidor en el puerto 3001

@@ -56,11 +56,22 @@ export default function Register() {
         });
       }, 2000);
     } catch (err) {
+      console.error('Error en registro:', err);
+      
+      // Obtener mensaje de error del backend o usar uno genérico
       const errorMsg = err?.response?.data?.message || err?.message || 'Error al registrar';
+      const errorDetail = err?.response?.data?.error;
+      
+      // Mostrar error detallado en desarrollo
+      if (errorDetail && import.meta.env.DEV) {
+        console.error('Detalles del error:', errorDetail);
+      }
       
       // Mensajes de error amigables
-      if (errorMsg === 'user_exists') {
+      if (errorMsg.includes('ya está registrado') || errorMsg === 'user_exists') {
         setMsg('⚠️ Este email ya está registrado. ¿Ya tienes cuenta?');
+      } else if (errorMsg.includes('conexión')) {
+        setMsg('⚠️ Error de conexión. Verifica que el servidor esté funcionando.');
       } else {
         setMsg(`⚠️ ${errorMsg}`);
       }
@@ -89,15 +100,15 @@ export default function Register() {
                 Correo electrónico
               </label>
               <div className="relative">
-                <input
+        <input
                   id="email"
-                  value={email}
+          value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="tu@email.com"
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg 
                            focus:ring-2 focus:ring-blue-500 focus:border-transparent 
                            transition-all duration-200 placeholder-gray-500"
-                  required
+          required
                   type="email"
                   disabled={loading}
                 />
@@ -111,10 +122,10 @@ export default function Register() {
                 Contraseña
               </label>
               <div className="relative">
-                <input
+        <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  value={pass}
+          value={pass}
                   onChange={e => setPass(e.target.value)}
                   placeholder="••••••••"
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg 
@@ -151,10 +162,10 @@ export default function Register() {
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg 
                            focus:ring-2 focus:ring-blue-500 focus:border-transparent 
                            transition-all duration-200 placeholder-gray-500"
-                  required
+          required
                   disabled={loading}
                   minLength={6}
-                />
+        />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -202,7 +213,7 @@ export default function Register() {
                 'Crear cuenta'
               )}
             </button>
-          </form>
+      </form>
 
           {/* Divider */}
           <div className="relative">
