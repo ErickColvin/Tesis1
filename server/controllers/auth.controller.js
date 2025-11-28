@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 const JWT_SECRET = process.env.JWT_SECRET || 'secretdev';
 const JWT_EXPIRES = '7d';
 const SALT_ROUNDS = 10;
+const ROOT_ADMIN_EMAIL = (process.env.ROOT_ADMIN_EMAIL || 'erick.a.colvincordova@gmail.com').toLowerCase();
 
 export async function register(req, res) {
   try {
@@ -16,6 +17,7 @@ export async function register(req, res) {
     }
 
     const { email, password } = req.body;
+    const normalizedEmail = email?.toLowerCase?.();
     
     // Validaciones básicas
     if (!email || !password) {
@@ -34,7 +36,7 @@ export async function register(req, res) {
     }
 
     // Verificar si el usuario ya existe
-    const exist = await User.findOne({ email: email.toLowerCase() });
+    const exist = await User.findOne({ email: normalizedEmail });
     if (exist) {
       return res.status(409).json({ message: 'Este email ya está registrado' });
     }
@@ -43,12 +45,17 @@ export async function register(req, res) {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     
     // Crear usuario
-    const user = await User.create({ email: email.toLowerCase(), hash });
+    const newUser = { email: normalizedEmail, hash, role: 'cliente' };
+    if (normalizedEmail === ROOT_ADMIN_EMAIL) {
+      newUser.role = 'admin';
+    }
+    const user = await User.create(newUser);
     
     return res.status(201).json({ 
       id: user._id, 
       email: user.email, 
       role: user.role,
+      permissions: user.permissions,
       message: 'Usuario creado exitosamente'
     });
   } catch (err) {
@@ -99,6 +106,11 @@ export async function login(req, res) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
+    if (user.email === ROOT_ADMIN_EMAIL && user.role !== 'admin') {
+      user.role = 'admin';
+      await user.save();
+    }
+
     // Verificar contraseña
     const ok = await bcrypt.compare(password, user.hash);
     if (!ok) {
@@ -106,19 +118,32 @@ export async function login(req, res) {
     }
 
     // Generar token JWT
-    const token = jwt.sign(
-      { sub: user._id.toString(), email: user.email, role: user.role }, 
-      JWT_SECRET, 
-      { expiresIn: JWT_EXPIRES }
-    );
+    const payload = { sub: user._id.toString(), email: user.email, role: user.role };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
     
     return res.json({ 
       token, 
-      user: { id: user._id, email: user.email, role: user.role },
+      user: { id: user._id, email: user.email, role: user.role, permissions: user.permissions },
       message: 'Login exitoso'
     });
   } catch (err) {
     console.error('login error', err);
+    return res.status(500).json({ message: 'Error interno del servidor' });
+  }
+}
+
+export async function profile(req, res) {
+  try {
+    const user = await User.findById(req.user.id, '_id email role permissions');
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+    return res.json({
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      permissions: user.permissions
+    });
+  } catch (err) {
+    console.error('profile error', err);
     return res.status(500).json({ message: 'Error interno del servidor' });
   }
 }

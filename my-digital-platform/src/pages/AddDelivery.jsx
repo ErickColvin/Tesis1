@@ -1,206 +1,204 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
+// ## Estado inicial para formulario de delivery
+const initialState = {
+  nombrePersona: "",
+  nombreProductos: "",
+  cantidad: 1,
+  status: "en_preparacion",
+  direccion: "",
+  fechaEntregaEstimada: "",
+  notas: "",
+  plataforma: "delivery"
+};
+// ## Fin estado inicial para formulario de delivery
+
+// ## Componente para registrar una entrega
 export default function AddDelivery() {
+  // ## Estados y navegacion del formulario
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
-  const [formData, setFormData] = useState({
-    nombrePersona: '',
-    nombreProductos: '',
-    cantidad: '',
-    status: 'pendiente',
-    direccion: '',
-    fechaEntregaEstimada: '',
-    notas: '',
-    plataforma: 'delivery'
-  });
+  const [formData, setFormData] = useState(initialState);
+  // ## Fin estados y navegacion del formulario
 
+  // ## Funcion para actualizar valores del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
+  // ## Fin funcion para actualizar valores del formulario
 
+  // ## Funcion para enviar formulario y crear delivery
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg(null);
     setLoading(true);
 
     try {
-      await api.post('/api/deliveries', formData);
-      setMsg('✅ Delivery agregado exitosamente');
-      setTimeout(() => {
-        navigate('/trazabilidad');
-      }, 1500);
+      await api.post("/api/deliveries", {
+        ...formData,
+        cantidad: Number(formData.cantidad) || 1
+      });
+      setMsg({ type: "success", text: "Delivery agregado exitosamente" });
+      setTimeout(() => navigate("/trazabilidad"), 1200);
     } catch (err) {
-      const errorMsg = err?.response?.data?.message || err?.message || 'Error al agregar delivery';
-      setMsg(`⚠️ ${errorMsg}`);
+      const errorMsg = err?.response?.data?.message || err?.message || "Error al agregar delivery";
+      setMsg({ type: "error", text: errorMsg });
     } finally {
       setLoading(false);
     }
   };
+  // ## Fin funcion para enviar formulario y crear delivery
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-      <div className="w-full max-w-2xl">
-        <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-8">
-          <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            Agregar Delivery / MercadoLibre
-          </h1>
+    <div className="space-y-6 animate-fade-in">
+      {/* ## Cabecera con resumen de la vista */}
+      <header className="space-y-2">
+        <p className="text-xs uppercase tracking-[0.4em] text-amber-300/70">Entregas</p>
+        <h1 className="text-3xl font-semibold text-white">Registrar pedido</h1>
+        <p className="text-sm text-gray-400">
+          Completa los detalles del envio para seguirlo en trazabilidad y generar alertas de stock.
+        </p>
+      </header>
+      {/* ## Fin cabecera con resumen de la vista */}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nombre Persona *
-                </label>
-                <input
-                  type="text"
-                  name="nombrePersona"
-                  value={formData.nombrePersona}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nombre Productos *
-                </label>
-                <input
-                  type="text"
-                  name="nombreProductos"
-                  value={formData.nombreProductos}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Cantidad *
-                </label>
-                <input
-                  type="number"
-                  name="cantidad"
-                  value={formData.cantidad}
-                  onChange={handleChange}
-                  required
-                  min="1"
-                  className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Estado *
-                </label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="en_preparacion">En Preparación</option>
-                  <option value="en_camino">En Camino</option>
-                  <option value="entregado">Entregado</option>
-                  <option value="cancelado">Cancelado</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Plataforma
-                </label>
-                <select
-                  name="plataforma"
-                  value={formData.plataforma}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="delivery">Delivery</option>
-                  <option value="mercadolibre">MercadoLibre</option>
-                  <option value="otro">Otro</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Fecha Entrega Estimada *
-                </label>
-                <input
-                  type="datetime-local"
-                  name="fechaEntregaEstimada"
-                  value={formData.fechaEntregaEstimada}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Dirección *
-              </label>
-              <input
-                type="text"
-                name="direccion"
-                value={formData.direccion}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Notas (opcional)
-              </label>
-              <textarea
-                name="notas"
-                value={formData.notas}
-                onChange={handleChange}
-                rows="3"
-                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {msg && (
-              <div className={`p-3 rounded-lg ${
-                msg.includes('✅') 
-                  ? 'bg-green-500/20 border border-green-500/50 text-green-300' 
-                  : 'bg-red-500/20 border border-red-500/50 text-red-300'
-              }`}>
-                {msg}
-              </div>
-            )}
-
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Guardando...' : 'Agregar Delivery'}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/trazabilidad')}
-                className="px-6 py-3 bg-white/5 border border-white/20 rounded-lg hover:bg-white/10"
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
+      {/* ## Mensaje de retroalimentacion para errores o exito */}
+      {msg && (
+        <div
+          className={`rounded-2xl px-5 py-3 text-sm ${
+            msg.type === "error"
+              ? "border border-rose-500/40 bg-rose-500/10 text-rose-100"
+              : "border border-emerald-500/40 bg-emerald-500/10 text-emerald-100"
+          }`}
+        >
+          {msg.text}
         </div>
-      </div>
+      )}
+      {/* ## Fin mensaje de retroalimentacion para errores o exito */}
+
+      {/* ## Formulario para registrar nueva entrega */}
+      <form onSubmit={handleSubmit} className="glass-panel p-8 grid gap-6 md:grid-cols-2">
+        <div>
+          <label className="text-sm text-gray-300">Nombre de la persona *</label>
+          <input
+            type="text"
+            name="nombrePersona"
+            value={formData.nombrePersona}
+            onChange={handleChange}
+            required
+            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-amber-400 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-300">Productos *</label>
+          <input
+            type="text"
+            name="nombreProductos"
+            value={formData.nombreProductos}
+            onChange={handleChange}
+            required
+            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-amber-400 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-300">Cantidad *</label>
+          <input
+            type="number"
+            min="1"
+            name="cantidad"
+            value={formData.cantidad}
+            onChange={handleChange}
+            required
+            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-amber-400 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-300">Estado *</label>
+          <select
+            className="mt-2 w-full rounded-xl select-dark px-4 py-3 focus:border-amber-400 focus:outline-none"
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            required
+          >
+            <option value="pendiente">Pendiente</option>
+            <option value="en_preparacion">En preparación</option>
+            <option value="en_camino">En camino</option>
+            <option value="entregado">Entregado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-300">Plataforma</label>
+          <div className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-gray-200">
+            Delivery (predeterminado)
+          </div>
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-300">Fecha entrega estimada *</label>
+          <input
+            type="datetime-local"
+            name="fechaEntregaEstimada"
+            value={formData.fechaEntregaEstimada}
+            onChange={handleChange}
+            required
+            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-amber-400 focus:outline-none"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="text-sm text-gray-300">Direcci�n *</label>
+          <input
+            type="text"
+            name="direccion"
+            value={formData.direccion}
+            onChange={handleChange}
+            required
+            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-amber-400 focus:outline-none"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="text-sm text-gray-300">Notas (opcional)</label>
+          <textarea
+            name="notas"
+            value={formData.notas}
+            onChange={handleChange}
+            rows="3"
+            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-amber-400 focus:outline-none"
+            placeholder="Indicaciones especiales de entrega, referencias, horarios."
+          />
+        </div>
+
+        <div className="md:col-span-2 flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={() => navigate("/trazabilidad")}
+            className="rounded-xl border border-white/20 px-6 py-3 text-sm text-white hover:bg-white/10"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="rounded-xl bg-gradient-to-r from-orange-500 to-rose-500 px-6 py-3 text-sm font-semibold shadow-lg hover:shadow-xl disabled:opacity-50"
+          >
+            {loading ? "Guardando..." : "Guardar entrega"}
+          </button>
+        </div>
+      </form>
+      {/* ## Fin formulario para registrar nueva entrega */}
     </div>
   );
 }
+// ## Fin componente para registrar una entrega
+
 

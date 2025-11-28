@@ -1,4 +1,13 @@
+import mongoose from 'mongoose';
 import Delivery from '../models/delivery.model.js';
+
+const buildDeliveryFilter = (identifier) => {
+  const or = [{ id: identifier }];
+  if (mongoose.Types.ObjectId.isValid(identifier)) {
+    or.push({ _id: identifier });
+  }
+  return { $or: or };
+};
 
 /**
  * GET /api/deliveries
@@ -95,7 +104,7 @@ export async function createDelivery(req, res) {
  */
 export async function getDeliveryById(req, res) {
   try {
-    const delivery = await Delivery.findOne({ id: req.params.id });
+    const delivery = await Delivery.findOne(buildDeliveryFilter(req.params.id));
     
     if (!delivery) {
       return res.status(404).json({ ok: false, error: 'Delivery no encontrado' });
@@ -115,7 +124,7 @@ export async function getDeliveryById(req, res) {
 export async function updateDelivery(req, res) {
   try {
     const delivery = await Delivery.findOneAndUpdate(
-      { id: req.params.id },
+      buildDeliveryFilter(req.params.id),
       req.body,
       { new: true, runValidators: true }
     );
@@ -137,7 +146,7 @@ export async function updateDelivery(req, res) {
  */
 export async function deleteDelivery(req, res) {
   try {
-    const delivery = await Delivery.findOneAndDelete({ id: req.params.id });
+    const delivery = await Delivery.findOneAndDelete(buildDeliveryFilter(req.params.id));
     
     if (!delivery) {
       return res.status(404).json({ ok: false, error: 'Delivery no encontrado' });
@@ -149,4 +158,7 @@ export async function deleteDelivery(req, res) {
     return res.status(500).json({ ok: false, error: 'Error al eliminar delivery' });
   }
 }
+
+
+
 

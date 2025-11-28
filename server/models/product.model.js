@@ -6,7 +6,8 @@ const productSchema = new mongoose.Schema({
   categoria: { type: String, required: true, trim: true },
   stock: { type: Number, required: true, min: 0, default: 0 },
   minStock: { type: Number, required: true, min: 0, default: 10 },
-  precioUnitario: { type: Number, required: true, min: 0, default: 0 }
+  precioUnitario: { type: Number, required: true, min: 0, default: 0 },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
 export default mongoose.models.Product || mongoose.model('Product', productSchema);

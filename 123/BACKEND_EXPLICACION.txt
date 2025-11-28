@@ -1,0 +1,29 @@
+Backend (server)
+----------------
+- Stack: Node + Express en modo ES modules. Base de datos MongoDB via Mongoose. Multer para recibir Excel en memoria; ExcelJS para leerlo. JWT para auth; bcrypt para hashes.
+- Arranque: server/index.js configura express.json, CORS, conecta a MongoDB (usa MONGODB_URI) y levanta en PORT (default 3001). Registra rutas /api/auth, /api/admin, /api/imports, /api/deliveries, /api/products, /api/alerts, /api/returns y un healthcheck en /api/health.
+- Autenticacion: middleware requireAuth (middleware/auth.js) exige Authorization: Bearer <token>; valida JWT y carga el usuario. requireAdmin comprueba role === 'admin'.
+- Modelos principales (server/models):
+  * user.model.js: email, hash, role (admin/cliente), permissions y timestamps.
+  * product.model.js: sku unico, nombre, categoria, stock, minStock, precioUnitario, updatedBy.
+  * package.model.js: code unico, productSku, state, location, notes.
+  * delivery.model.js: datos de entregas/paquetes (estado, fechas, ubicacion).
+  * alert.model.js y alertConfig.model.js: alertas de stock y configuracion de destinatarios de correo.
+  * import.model.js: log de importaciones (rowsOk, errors, productos/paquetes creados/actualizados).
+  * return.model.js: devoluciones de Mercado Libre (pedido, producto, sku, estado, resultado, etc.).
+- Rutas y controladores:
+  * /api/auth (auth.controller.js): register crea usuario (cliente por defecto, admin si coincide ROOT_ADMIN_EMAIL); login genera JWT; /me devuelve perfil.
+  * /api/imports (import.controller.js): POST recibe Excel (type=products|packages), delega a ImportService, guarda import.model y envia email resumen; GET lista imports paginados; GET/:id retorna detalle.
+  * /api/products (product.controller.js): createProducts upsert masivo (max 5) y genera alertas si stock <= minStock; listProducts con paginacion y filtros; updateProduct por SKU con manejo de alertas.
+  * /api/deliveries (delivery.controller.js): CRUD de entregas/paquetes; solo list es publico, el resto exige admin.
+  * /api/alerts (alert.controller.js): feed de alertas activas y endpoints basicos de gestion.
+  * /api/returns (return.controller.js): create/list para usuarios autenticados; update (PATCH) solo admin, usado por la vista MercadoLibreReturns.
+  * /api/admin (admin.controller.js): acciones de administracion (roles, stats, etc.).
+- Servicios destacados:
+  * ImportService (services/import.service.js): lee Excel con ExcelJS, normaliza headers (elimina acentos y espacios), detecta duplicados, valida con ValidationService y hace bulkUpsert via ProductRepository/PackageRepository. Tras importar productos sincroniza alertas y notifica stock bajo.
+  * ValidationService (services/validation.service.js): reglas de negocio para productos (SKU/nombre/categoria obligatorios, stock y precio >=0) y paquetes (code y productSku obligatorios, estado permitido). Detecta duplicados en el archivo.
+  * notification.service.js + email.service.js: arman correos de alertas de stock e importaciones y los envian segun alertConfig; usa nodemailer.
+  * Repositories: product.repository.js y package.repository.js encapsulan upsert masivo, listados y consultas.
+- Pruebas: server/tests/import.test.js usa Jest + Supertest + mongodb-memory-server para validar el flujo de importacion de Excel (productos y paquetes) y los endpoints de logs de import.
+- Scripts utiles: scripts/promote-admin.js para ascender usuarios a admin; test-api.js y test-connection.js en la raiz para smoke tests de API/DB.
+- Variables de entorno tipicas: MONGODB_URI, JWT_SECRET, ROOT_ADMIN_EMAIL, SMTP_* (para correos). Sin ellas, algunos servicios quedan degradados (ej. notificaciones).

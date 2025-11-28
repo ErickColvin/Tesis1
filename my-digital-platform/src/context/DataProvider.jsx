@@ -1,57 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DataContext } from './DataContext';
+import api from '../services/api';
 
 export const DataProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [lastImport, setLastImport] = useState(null);
 
-  // Fetch inicial
-  useEffect(() => {
-    (async () => {
-      try {
-        const [pRes, aRes] = await Promise.all([
-          fetch('/api/products'),
-          fetch('/api/alerts?status=active'),
-        ]);
-        const productsData = await pRes.json();
-        const alertsData = await aRes.json();
-        setProducts(productsData.items || productsData || []);
-        setAlerts(alertsData.alerts || alertsData || []);
-      } catch (err) {
-        console.error('Fetch inicial:', err);
-      }
-    })();
+  const loadData = useCallback(async () => {
+    try {
+      const [productsRes, alertsRes] = await Promise.all([
+        api.get('/api/products'),
+        api.get('/api/alerts/feed')
+      ]);
+      setProducts(productsRes.data.items || productsRes.data || []);
+      setAlerts(alertsRes.data.alerts || alertsRes.data || []);
+    } catch (err) {
+      console.error('Fetch inicial:', err);
+    }
   }, []);
 
-  const uploadExcel = async (file) => {
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const uploadExcel = useCallback(async (file, options = {}) => {
+    if (!file) throw new Error('Archivo requerido');
+    const { type = 'products', onProgress } = options;
     const form = new FormData();
     form.append('file', file);
+    form.append('type', type);
+
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: form,
+      const response = await api.post('/api/imports', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (event) => {
+          if (onProgress && event.total) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            onProgress(percent);
+          }
+        }
       });
-      if (!res.ok) throw new Error(`Status ${res.status}`);
-      // refresca datos
-      const [productsRes, alertsRes] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/alerts?status=active')
-      ]);
-      const productsData = await productsRes.json();
-      const alertsData = await alertsRes.json();
-      setProducts(productsData.items || productsData || []);
-      setAlerts(alertsData.alerts || alertsData || []);
-      return true;
+      await loadData();
+      setLastImport(response.data);
+      return response.data;
     } catch (err) {
-      console.error('uploadExcel error:', err);
-      return false;
+      console.error('uploadExcel error:', err?.response?.data || err);
+      throw err;
     }
-  };
+  }, [loadData]);
 
   return (
-    <DataContext.Provider
-      value={{ products, alerts, uploadExcel }}
-    >
+    <DataContext.Provider value={{ products, alerts, uploadExcel, refreshData: loadData, lastImport }}>
       {children}
     </DataContext.Provider>
   );

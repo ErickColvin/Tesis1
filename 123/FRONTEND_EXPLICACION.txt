@@ -1,0 +1,18 @@
+Frontend (my-digital-platform)
+------------------------------
+- Entry: src/main.jsx monta <App /> dentro de Router. Tailwind y estilos globales en src/index.css y src/App.css.
+- App.jsx: define rutas y usa BrowserRouter. Maneja estado local del usuario (role, permissions) y helpers canView/canEdit para proteger secciones. Si no hay usuario, redirige a /login; si hay usuario, envuelve todo en <DataProvider /> y muestra Navbar + contenido.
+- Navbar.jsx: muestra enlaces (Inicio, Importar Excel, Productos, Trazabilidad, Cliente) y botones de usuario/salida. Recibe navLinks y canAccess para ocultar secciones segun permisos.
+- Contexto de datos: DataContext + DataProvider.
+  * DataProvider.jsx: carga productos y alertas iniciales desde /api/products y /api/alerts/feed. Expone uploadExcel(file, { type }) para enviar FormData a /api/imports y refrescar datos. Guarda lastImport para mostrar resumenes.
+- Servicios: src/services/api.js crea cliente Axios con baseURL VITE_API_URL y helper setAuthToken para inyectar el JWT en Authorization: Bearer.
+- Vistas principales (src/pages):
+  * Home.jsx: dashboard/resumen visual de productos y alertas.
+  * ImportExcel.jsx: formulario drag-and-drop para subir Excel; usa uploadExcel() y muestra progreso/resumen.
+  * DataTable.jsx y Products: tabla de productos con filtros y acciones basicas.
+  * Trazabilidad.jsx y AddDelivery.jsx: gestionan entregas/paquetes, lectura de /api/deliveries y altas cuando allowEdit es true.
+  * MercadoLibreReturns.jsx: lista devoluciones de Mercado Libre desde /api/returns; permite editar registros con modal y PATCH /api/returns/:id.
+  * Login.jsx / Register.jsx: autenticacion contra /api/auth/login y /api/auth/register. Guardan token en localStorage y llaman setAuthToken.
+  * AdminDashboard.jsx / ClientView.jsx / ClientAddOrder.jsx: pantallas especificas para administracion y clientes.
+- Autorizacion en UI: cada ruta pasa por guard(section) en App.jsx; si falta permiso muestra <AccessDenied /> con mensaje. Admin omite verificaciones.
+- Estilos: Tailwind utilidades + clases personalizadas (glass-panel, animated-bg, select-dark) y gradientes/animaciones. Componentes usan clases responsivas.
