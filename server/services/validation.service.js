@@ -92,7 +92,7 @@ export class ValidationService {
     const duplicates = new Set();
     
     rows.forEach((row, idx) => {
-      const value = row[key];
+      const value = row?.data?.[key];
       if (value && seen.has(value)) {
         duplicates.add(idx);
       } else if (value) {

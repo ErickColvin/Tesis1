@@ -10,6 +10,7 @@ import importRoutes from './routes/import.routes.js';
 import deliveryRoutes from './routes/delivery.routes.js';
 import productRoutes from './routes/product.routes.js';
 import alertRoutes from './routes/alert.routes.js';
+import returnRoutes from './routes/return.routes.js';
 
 const app = express();
 app.use(cors());
@@ -211,6 +212,9 @@ app.use('/api/products', productRoutes);
 
 // Rutas de alertas
 app.use('/api/alerts', alertRoutes);
+
+// Rutas de devoluciones de MercadoLibre
+app.use('/api/returns', returnRoutes);
 
 // Rutas legacy (a deprecar): mantener para retrocompatibilidad
 // Mantener por compatibilidad con código antiguo

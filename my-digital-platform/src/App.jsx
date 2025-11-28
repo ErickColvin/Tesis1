@@ -10,99 +10,158 @@ import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import Trazabilidad from './pages/Trazabilidad';
 import AddDelivery from './pages/AddDelivery';
+import MercadoLibreReturns from './pages/MercadoLibreReturns';
+import ClientView from './pages/ClientView';
+import ClientAddOrder from './pages/ClientAddOrder';
 import { DataProvider } from './context/DataProvider';
+import AccessDenied from './components/AccessDenied';
 import { setAuthToken } from './services/api';
 
-function parseToken(token) {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return { email: payload.email, role: payload.role, exp: payload.exp };
-  } catch {
-    return null;
-  }
-}
+const NAV_LINKS = [
+  { path: '/', label: 'Inicio', section: 'dashboard' },
+  { path: '/products', label: 'Productos', section: 'products' },
+  { path: '/trazabilidad', label: 'Trazabilidad', section: 'trazabilidad' },
+  { path: '/returns', label: 'Mercado Libre', section: 'trazabilidad' },
+  { path: '/cliente', label: 'Cliente', section: 'dashboard' }
+];
+
+const SECTION_LABELS = {
+  dashboard: 'el panel principal',
+  import: 'la importacion de Excel',
+  products: 'el modulo de productos',
+  trazabilidad: 'la trazabilidad'
+};
+
+const BackgroundLayers = () => (
+  <>
+    <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-72 bg-gradient-to-b from-slate-900/70 via-blue-950/30 to-transparent blur-3xl opacity-80" />
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 -z-10 h-72 bg-gradient-to-t from-slate-950/70 via-blue-950/30 to-transparent blur-3xl opacity-80" />
+  </>
+);
 
 const App = () => {
-  const [user, setUser] = useState(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    const parsed = parseToken(token);
-    if (!parsed) {
-      localStorage.removeItem('token');
-      return null;
-    }
-    if (parsed.exp && Date.now() >= parsed.exp * 1000) {
-      localStorage.removeItem('token');
-      return null;
-    }
-    setAuthToken(token);
-    return { email: parsed.email, role: parsed.role };
-  });
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) setAuthToken(token);
+    localStorage.removeItem('token');
+    localStorage.removeItem('userProfile');
   }, []);
-
-  useEffect(() => {
-    if (!user) {
-      // si no hay usuario, aseguramos que la URL vaya a /login
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-        window.history.replaceState({}, '', '/login');
-      }
-    }
-  }, [user]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userProfile');
     setAuthToken('');
     setUser(null);
-    window.history.replaceState({}, '', '/login');
-    window.location.reload();
   };
 
-  // Si no hay usuario autenticado, solo exponer /login y /register
-  if (!user) {
-    return (
-      <Router>
-        <div className="p-4">
-          <Routes>
-            <Route path="/login" element={<Login onLogin={(u) => setUser(u)} />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </div>
-      </Router>
-    );
-  }
+  useEffect(() => {
+    if (!user && window.location.pathname !== '/register') {
+      window.history.replaceState({}, '', '/login');
+    }
+  }, [user]);
 
-  // Usuario autenticado: mostrar la app completa
+  const handleLoginSuccess = (sessionUser) => {
+    setUser(sessionUser);
+  };
+
+  const canView = (section) => {
+    if (!user) return false;
+    if (user.role === 'admin') return true;
+    return Boolean(user.permissions?.[section]?.view);
+  };
+
+  const canEdit = (section) => {
+    if (!user) return false;
+    if (user.role === 'admin') return true;
+    return Boolean(user.permissions?.[section]?.edit);
+  };
+
+  const guard = (section, node) => {
+    return canView(section) ? node : <AccessDenied label={SECTION_LABELS[section] || 'esta area'} />;
+  };
+
   return (
-    <DataProvider>
-      <Router>
-        <Navbar user={user} onLogout={handleLogout} />
-        <div className="p-4">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/import" element={<ImportExcel />} />
-            <Route path="/data" element={<DataTable />} />
-            <Route path="/products" element={<DataTable />} />
-            <Route path="/trazabilidad" element={<Trazabilidad />} />
-            <Route path="/add-delivery" element={<AddDelivery />} />
-            <Route path="/register" element={<Navigate to="/" replace />} />
-            <Route path="/login" element={<Navigate to="/" replace />} />
-            <Route
-              path="/admin"
-              element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" replace />}
-            />
-            <Route
-              path="/import-protected"
-              element={user ? <ImportExcel /> : <Navigate to="/login" replace />}
-            />
-          </Routes>
-        </div>
-      </Router>
-    </DataProvider>
+    <Router>
+      <div className="min-h-screen relative overflow-hidden bg-slate-950 text-slate-100 animated-bg">
+        <BackgroundLayers />
+        {user ? (
+          <DataProvider>
+            <div className="relative z-10 w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-10 py-6 space-y-6">
+              <Navbar
+                user={user}
+                onLogout={handleLogout}
+                navLinks={NAV_LINKS}
+                canAccess={canView}
+              />
+              <main className="glass-panel p-6 sm:p-10 animate-fade-in">
+                <Routes>
+                  <Route path="/" element={guard('dashboard', <Home user={user} />)} />
+                  <Route path="/import" element={guard('import', <ImportExcel allowEdit={canEdit('import')} />)} />
+                  <Route path="/data" element={guard('products', <DataTable allowEdit={canEdit('products')} />)} />
+                  <Route path="/products" element={guard('products', <DataTable allowEdit={canEdit('products')} />)} />
+                  <Route
+                    path="/trazabilidad"
+                    element={guard('trazabilidad', <Trazabilidad allowEdit={canEdit('trazabilidad')} />)}
+                  />
+                  <Route
+                    path="/returns"
+                    element={guard(
+                      'trazabilidad',
+                      <MercadoLibreReturns allowEdit={canEdit('trazabilidad')} />
+                    )}
+                  />
+                  <Route
+                    path="/returns/new"
+                    element={guard(
+                      'trazabilidad',
+                      <MercadoLibreReturns allowEdit={canEdit('trazabilidad')} startCreate />
+                    )}
+                  />
+                  <Route
+                    path="/cliente"
+                    element={guard('dashboard', <ClientView allowEdit />)}
+                  />
+                  <Route
+                    path="/cliente/nuevo"
+                    element={guard('dashboard', <ClientAddOrder />)}
+                  />
+                  <Route
+                    path="/add-delivery"
+                    element={
+                      canEdit('trazabilidad')
+                        ? <AddDelivery />
+                        : <AccessDenied label="el registro de nuevas entregas" />
+                    }
+                  />
+                  <Route
+                    path="/admin"
+                    element={user?.role === 'admin' ? <AdminDashboard /> : <AccessDenied label="el panel de administracion" />}
+                  />
+                  <Route path="/login" element={<Navigate to="/" replace />} />
+                  <Route path="/register" element={<Navigate to="/" replace />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
+            </div>
+          </DataProvider>
+        ) : (
+          <div className="relative z-10 flex min-h-screen items-center justify-center px-4">
+            <div className="w-full max-w-2xl">
+              <div className="mb-8 text-center">
+                <p className="text-sm uppercase tracking-[0.3em] text-amber-300/70">Trace Link</p>
+                <h1 className="text-3xl font-semibold text-white mt-3">Plataforma digital segura</h1>
+                <p className="text-gray-300 text-sm mt-2">Accede con tus credenciales para continuar</p>
+              </div>
+              <Routes>
+                <Route path="/login" element={<Login onLogin={handleLoginSuccess} />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="*" element={<Navigate to="/login" replace />} />
+              </Routes>
+            </div>
+          </div>
+        )}
+      </div>
+    </Router>
   );
 };
 

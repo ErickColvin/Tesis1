@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const importSchema = new mongoose.Schema({
   fileName: { type: String, required: true },
+  rowsTotal: { type: Number, required: true, default: 0 },
   rowsOk: { type: Number, required: true, default: 0 },
   rowsError: { type: Number, required: true, default: 0 },
   importErrors: [{ 
@@ -17,4 +18,3 @@ const importSchema = new mongoose.Schema({
 }, { timestamps: true, suppressReservedKeysWarning: true });
 
 export default mongoose.models.Import || mongoose.model('Import', importSchema);
-

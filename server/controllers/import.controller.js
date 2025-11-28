@@ -1,5 +1,6 @@
 import Import from '../models/import.model.js';
 import { ImportService } from '../services/import.service.js';
+import { notifyImportSummary } from '../services/notification.service.js';
 
 /**
  * POST /api/imports
@@ -27,30 +28,40 @@ export async function importData(req, res) {
     }
 
     // Guardar registro de importación
-    const importRecord = await Import.create({
-      fileName: req.file.originalname,
+    const summary = {
+      rowsTotal: result.rowsTotal,
       rowsOk: result.rowsOk,
       rowsError: result.rowsError,
-      importErrors: result.errors, // Cambiado de 'errors' a 'importErrors' para evitar warning
       productsCreated: result.productsCreated || 0,
       productsUpdated: result.productsUpdated || 0,
       packagesCreated: result.packagesCreated || 0,
-      packagesUpdated: result.packagesUpdated || 0,
+      packagesUpdated: result.packagesUpdated || 0
+    };
+
+    const importRecord = await Import.create({
+      fileName: req.file.originalname,
+      rowsTotal: summary.rowsTotal,
+      rowsOk: summary.rowsOk,
+      rowsError: summary.rowsError,
+      importErrors: result.errors, // Cambiado de 'errors' a 'importErrors' para evitar warning
+      productsCreated: summary.productsCreated,
+      productsUpdated: summary.productsUpdated,
+      packagesCreated: summary.packagesCreated,
+      packagesUpdated: summary.packagesUpdated,
       user: userId
+    });
+
+    await notifyImportSummary({
+      fileName: req.file.originalname,
+      summary,
+      errors: result.errors || []
     });
 
     return res.json({
       ok: true,
       importId: importRecord._id,
-      summary: {
-        rowsOk: result.rowsOk,
-        rowsError: result.rowsError,
-        productsCreated: result.productsCreated || 0,
-        productsUpdated: result.productsUpdated || 0,
-        packagesCreated: result.packagesCreated || 0,
-        packagesUpdated: result.packagesUpdated || 0
-      },
-      errors: result.errors.slice(0, 10) // Primeros 10 errores
+      summary,
+      errors: (result.errors || []).slice(0, 10) // Primeros 10 errores
     });
 
   } catch (err) {
@@ -114,4 +125,3 @@ export async function getImportById(req, res) {
     return res.status(500).json({ ok: false, error: 'Error al obtener import' });
   }
 }
-

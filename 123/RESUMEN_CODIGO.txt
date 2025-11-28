@@ -1,0 +1,13 @@
+Resumen rapido del proyecto
+---------------------------
+- Stack: frontend React 18 + Vite + Tailwind; backend Node 18+ con Express y MongoDB (Mongoose); Axios para llamadas HTTP; JWT para autenticacion.
+- Carpetas clave: my-digital-platform/ (frontend), server/ (API), docs y guias varias en la raiz y en 123/.
+- Flujo general: el usuario ingresa via Login/Register, obtiene un JWT y la app guarda el token en Axios. Las vistas internas consultan la API para productos, alertas, devoluciones y entregas. La importacion de Excel se hace desde el frontend y se procesa en el backend para crear/actualizar productos o paquetes.
+- Permisos: los roles y permisos vienen en el usuario (admin tiene acceso total). El frontend revisa user.role y user.permissions por seccion antes de renderizar.
+- Datos principales: productos, paquetes/entregas, alertas de stock, devoluciones de Mercado Libre. Se persisten en MongoDB via modelos Mongoose y se exponen por rutas REST en /api.
+- Estilos: Tailwind para utilidades y CSS personalizado (fondos, glassmorphism, animaciones) en src/index.css y src/App.css.
+
+Como probar rapido
+- Backend: cd server && npm install && npm start (necesita MONGODB_URI y JWT_SECRET en .env).
+- Frontend: cd my-digital-platform && npm install && npm run dev (usa VITE_API_URL apuntando al backend).
+- Smoke tests: server/tests/import.test.js con Jest+Supertest; scripts test-api.js y test-connection.js para chequear endpoints/DB.
