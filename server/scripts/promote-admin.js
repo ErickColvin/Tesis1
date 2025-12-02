@@ -1,3 +1,4 @@
+// Script CLI para promover un usuario existente a rol admin.
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import User from '../models/user.model.js';

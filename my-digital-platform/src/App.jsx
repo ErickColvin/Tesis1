@@ -11,12 +11,14 @@ import AdminDashboard from './pages/AdminDashboard';
 import Trazabilidad from './pages/Trazabilidad';
 import AddDelivery from './pages/AddDelivery';
 import MercadoLibreReturns from './pages/MercadoLibreReturns';
+import ReturnForm from './pages/ReturnForm';
 import ClientView from './pages/ClientView';
 import ClientAddOrder from './pages/ClientAddOrder';
 import { DataProvider } from './context/DataProvider';
 import AccessDenied from './components/AccessDenied';
 import { setAuthToken } from './services/api';
 
+// ## Configuracion de rutas y etiquetas para la navegacion
 const NAV_LINKS = [
   { path: '/', label: 'Inicio', section: 'dashboard' },
   { path: '/products', label: 'Productos', section: 'products' },
@@ -31,39 +33,52 @@ const SECTION_LABELS = {
   products: 'el modulo de productos',
   trazabilidad: 'la trazabilidad'
 };
+// ## Fin configuracion de rutas y etiquetas para la navegacion
 
+// ## Capas de fondo para efectos visuales generales
 const BackgroundLayers = () => (
   <>
     <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-72 bg-gradient-to-b from-slate-900/70 via-blue-950/30 to-transparent blur-3xl opacity-80" />
     <div className="pointer-events-none fixed inset-x-0 bottom-0 -z-10 h-72 bg-gradient-to-t from-slate-950/70 via-blue-950/30 to-transparent blur-3xl opacity-80" />
   </>
 );
+// ## Fin capas de fondo para efectos visuales generales
 
+// ## Componente principal de la aplicacion
 const App = () => {
+  // ## Estado y efectos iniciales de autenticacion
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('userProfile');
   }, []);
+  // ## Fin estado y efectos iniciales de autenticacion
 
+  // ## Funcion para cerrar sesion
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userProfile');
     setAuthToken('');
     setUser(null);
   };
+  // ## Fin funcion para cerrar sesion
 
+  // ## Redireccion inicial si no hay usuario
   useEffect(() => {
     if (!user && window.location.pathname !== '/register') {
       window.history.replaceState({}, '', '/login');
     }
   }, [user]);
+  // ## Fin redireccion inicial si no hay usuario
 
+  // ## Funcion para manejar login exitoso
   const handleLoginSuccess = (sessionUser) => {
     setUser(sessionUser);
   };
+  // ## Fin funcion para manejar login exitoso
 
+  // ## Validaciones de permisos de vista y edicion
   const canView = (section) => {
     if (!user) return false;
     if (user.role === 'admin') return true;
@@ -75,11 +90,15 @@ const App = () => {
     if (user.role === 'admin') return true;
     return Boolean(user.permissions?.[section]?.edit);
   };
+  // ## Fin validaciones de permisos de vista y edicion
 
+  // ## Guardia de rutas para verificar permisos
   const guard = (section, node) => {
     return canView(section) ? node : <AccessDenied label={SECTION_LABELS[section] || 'esta area'} />;
   };
+  // ## Fin guardia de rutas para verificar permisos
 
+  // ## Render de rutas segun autenticacion
   return (
     <Router>
       <div className="min-h-screen relative overflow-hidden bg-slate-950 text-slate-100 animated-bg">
@@ -114,7 +133,7 @@ const App = () => {
                     path="/returns/new"
                     element={guard(
                       'trazabilidad',
-                      <MercadoLibreReturns allowEdit={canEdit('trazabilidad')} startCreate />
+                      canEdit('trazabilidad') ? <ReturnForm /> : <AccessDenied label="crear devoluciones" />
                     )}
                   />
                   <Route
@@ -163,6 +182,8 @@ const App = () => {
       </div>
     </Router>
   );
+  // ## Fin render de rutas segun autenticacion
 };
+// ## Fin componente principal de la aplicacion
 
 export default App;

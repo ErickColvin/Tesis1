@@ -1,3 +1,4 @@
+// Modelo de configuracion global de alertas y destinatarios.
 import mongoose from 'mongoose';
 
 const alertConfigSchema = new mongoose.Schema(

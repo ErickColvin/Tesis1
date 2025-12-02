@@ -1,3 +1,4 @@
+// Controlador de alertas: lista, resuelve y combina avisos de stock/entregas.
 import Alert from '../models/alert.model.js';
 import Delivery from '../models/delivery.model.js';
 import {
@@ -136,6 +137,7 @@ export async function alertFeed(req, res) {
       }))
     ];
 
+    // Mezcla y ordena alertas recientes sin importar su origen.
     feed.sort((a, b) => {
       const aDate = new Date(a.createdAt).getTime();
       const bDate = new Date(b.createdAt).getTime();

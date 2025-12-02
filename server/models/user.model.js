@@ -1,3 +1,4 @@
+// Modelo de usuarios con roles basicos y permisos por seccion.
 import mongoose from 'mongoose';
 
 const permissionSchema = new mongoose.Schema(

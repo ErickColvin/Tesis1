@@ -3,10 +3,13 @@ import { DataContext } from './DataContext';
 import api from '../services/api';
 
 export const DataProvider = ({ children }) => {
+  // ## Estado global para productos, alertas y ultima importacion
   const [products, setProducts] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [lastImport, setLastImport] = useState(null);
+  // ## Fin estado global para productos, alertas y ultima importacion
 
+  // ## Carga inicial de productos y alertas
   const loadData = useCallback(async () => {
     try {
       const [productsRes, alertsRes] = await Promise.all([
@@ -19,11 +22,15 @@ export const DataProvider = ({ children }) => {
       console.error('Fetch inicial:', err);
     }
   }, []);
+  // ## Fin carga inicial de productos y alertas
 
+  // ## Efecto para ejecutar carga inicial al montar
   useEffect(() => {
     loadData();
   }, [loadData]);
+  // ## Fin efecto para ejecutar carga inicial al montar
 
+  // ## Funcion para subir Excel y refrescar datos
   const uploadExcel = useCallback(async (file, options = {}) => {
     if (!file) throw new Error('Archivo requerido');
     const { type = 'products', onProgress } = options;
@@ -49,10 +56,13 @@ export const DataProvider = ({ children }) => {
       throw err;
     }
   }, [loadData]);
+  // ## Fin funcion para subir Excel y refrescar datos
 
+  // ## Proveedor de contexto con valores y acciones compartidas
   return (
     <DataContext.Provider value={{ products, alerts, uploadExcel, refreshData: loadData, lastImport }}>
       {children}
     </DataContext.Provider>
   );
+  // ## Fin proveedor de contexto con valores y acciones compartidas
 };

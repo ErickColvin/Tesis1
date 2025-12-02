@@ -1,3 +1,4 @@
+// Pruebas de integracion para importaciones de Excel (productos y paquetes).
 import request from 'supertest';
 import express from 'express';
 import cors from 'cors';

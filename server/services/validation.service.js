@@ -91,6 +91,7 @@ export class ValidationService {
     const seen = new Set();
     const duplicates = new Set();
     
+    // Recoge los indices que repiten la clave primaria en el archivo cargado.
     rows.forEach((row, idx) => {
       const value = row?.data?.[key];
       if (value && seen.has(value)) {

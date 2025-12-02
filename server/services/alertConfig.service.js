@@ -1,3 +1,4 @@
+// Servicio para leer/normalizar configuracion de alertas y destinatarios por defecto.
 import AlertConfig from '../models/alertConfig.model.js';
 
 const DEFAULT_ALERT_EMAIL = (process.env.ALERT_DEFAULT_EMAIL || 'erick.a.colvincordova@gmail.com').trim();

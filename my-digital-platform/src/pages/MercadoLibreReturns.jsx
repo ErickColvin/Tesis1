@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 
+// ## Catalogos para motivos y estados de devolucion
 const reasons = ['Producto equivocado', 'No era como esperaba', 'Falla tecnica', 'Danos en transporte', 'Otro'];
 
 const conditionOptions = [
@@ -15,7 +16,9 @@ const resultOptions = [
   { value: 'para_revision', label: 'Enviar a revision' },
   { value: 'descartado', label: 'Descartar' }
 ];
+// ## Fin catalogos para motivos y estados de devolucion
 
+// ## Estructura base del formulario de devoluciones
 const emptyReturnForm = {
   marketplaceOrderId: '',
   producto: '',
@@ -28,14 +31,19 @@ const emptyReturnForm = {
   customerEmail: '',
   fechaRecoleccion: ''
 };
+// ## Fin estructura base del formulario de devoluciones
 
+// ## Formatear fecha para inputs date
 const formatDateInput = (value) => {
   if (!value) return '';
   const date = new Date(value);
   return date.toISOString().slice(0, 10);
 };
+// ## Fin formatear fecha para inputs date
 
+// ## Gestion de devoluciones Mercado Libre con CRUD
 export default function MercadoLibreReturns({ allowEdit = true, startCreate = false }) {
+  // ## Estado para feedback, lista, filtros y modal de formulario
   const [feedback, setFeedback] = useState(null);
   const [returnsList, setReturnsList] = useState([]);
   const [listLoading, setListLoading] = useState(false);
@@ -48,17 +56,22 @@ export default function MercadoLibreReturns({ allowEdit = true, startCreate = fa
     form: { ...emptyReturnForm },
     saving: false
   });
+  // ## Fin estado para feedback, lista, filtros y modal de formulario
 
+  // ## Cargar devoluciones al montar
   useEffect(() => {
     loadReturns();
   }, []);
 
+  // ## Abrir modal de creacion segun bandera de inicio
   useEffect(() => {
     if (startCreate && allowEdit) {
       openCreate();
     }
   }, [startCreate, allowEdit]);
+  // ## Fin abrir modal de creacion segun bandera de inicio
 
+  // ## Consulta de devoluciones
   const loadReturns = async () => {
     setListLoading(true);
     try {
@@ -71,7 +84,9 @@ export default function MercadoLibreReturns({ allowEdit = true, startCreate = fa
       setListLoading(false);
     }
   };
+  // ## Fin consulta de devoluciones
 
+  // ## Abrir modal en modo edicion con datos cargados
   const openEdit = (record) => {
     if (!allowEdit) return;
     setFormModal({
@@ -93,7 +108,9 @@ export default function MercadoLibreReturns({ allowEdit = true, startCreate = fa
       }
     });
   };
+  // ## Fin abrir modal en modo edicion con datos cargados
 
+  // ## Abrir modal en modo creacion vacio
   const openCreate = () => {
     if (!allowEdit) return;
     setFormModal({
@@ -104,15 +121,21 @@ export default function MercadoLibreReturns({ allowEdit = true, startCreate = fa
       form: { ...emptyReturnForm }
     });
   };
+  // ## Fin abrir modal en modo creacion vacio
 
+  // ## Cerrar y resetear modal
   const closeModal = () => {
     setFormModal({ open: false, mode: 'edit', record: null, form: { ...emptyReturnForm }, saving: false });
   };
+  // ## Fin cerrar y resetear modal
 
+  // ## Actualizar campo de formulario controlado
   const updateFormField = (field, value) => {
     setFormModal((prev) => ({ ...prev, form: { ...prev.form, [field]: value } }));
   };
+  // ## Fin actualizar campo de formulario controlado
 
+  // ## Guardar devolucion (crear o editar)
   const saveForm = async () => {
     if (!allowEdit) return;
     const payload = {
@@ -152,7 +175,9 @@ export default function MercadoLibreReturns({ allowEdit = true, startCreate = fa
       setFormModal((prev) => ({ ...prev, saving: false }));
     }
   };
+  // ## Fin guardar devolucion (crear o editar)
 
+  // ## Filtrado basico por texto y estado
   const normalizedSearch = searchText.trim().toLowerCase();
   const filteredReturns = returnsList.filter((item) => {
     if (statusFilter && item.resultado !== statusFilter) return false;
@@ -171,7 +196,9 @@ export default function MercadoLibreReturns({ allowEdit = true, startCreate = fa
       .toLowerCase();
     return haystack.includes(normalizedSearch);
   });
+  // ## Fin filtrado basico por texto y estado
 
+  // ## Render principal con filtros, tabla y modal de devoluciones
   return (
     <div className="space-y-6">
       <header className="space-y-2">
@@ -299,8 +326,8 @@ export default function MercadoLibreReturns({ allowEdit = true, startCreate = fa
       </div>
 
       {formModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4">
-          <div className="glass-panel w-full max-w-3xl p-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/80 px-4 pt-20 sm:pt-24 pb-14 overflow-y-auto">
+          <div className="glass-panel w-full max-w-4xl p-8 mt-6">
             <div className="flex items-start justify-between mb-6">
               <div>
                 <h3 className="text-2xl font-semibold text-white">
@@ -445,3 +472,4 @@ export default function MercadoLibreReturns({ allowEdit = true, startCreate = fa
     </div>
   );
 }
+// ## Fin gestion de devoluciones Mercado Libre con CRUD

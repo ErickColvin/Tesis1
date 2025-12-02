@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
+// ## Estado base para formulario de pedidos del cliente
 const initialState = {
   nombrePersona: '',
   nombreProductos: '',
@@ -9,18 +10,25 @@ const initialState = {
   direccion: '',
   notas: ''
 };
+// ## Fin estado base para formulario de pedidos del cliente
 
+// ## Formulario para que el cliente agregue un pedido
 export default function ClientAddOrder() {
   const navigate = useNavigate();
+  // ## Estado local y mensajes de carga
   const [form, setForm] = useState(initialState);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
+  // ## Fin estado local y mensajes de carga
 
+  // ## Actualizar inputs controlados del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+  // ## Fin actualizar inputs controlados del formulario
 
+  // ## Enviar pedido al backend y redirigir
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg(null);
@@ -46,7 +54,9 @@ export default function ClientAddOrder() {
       setLoading(false);
     }
   };
+  // ## Fin enviar pedido al backend y redirigir
 
+  // ## Render del formulario de alta de pedido
   return (
     <div className="space-y-6 animate-fade-in">
       <header className="space-y-2">
@@ -149,3 +159,4 @@ export default function ClientAddOrder() {
     </div>
   );
 }
+// ## Fin formulario para que el cliente agregue un pedido

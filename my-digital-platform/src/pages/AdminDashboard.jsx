@@ -1,13 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
 
+// ## Catalogo de modulos administrables y su descripcion
 const MODULES = [
   { key: 'dashboard', label: 'Dashboard', description: 'Acceso al panel principal y tarjetas resumen.' },
   { key: 'import', label: 'Importar Excel', description: 'Carga masiva de inventario mediante archivos.' },
   { key: 'products', label: 'Productos', description: 'Consulta y edicion del catalogo.' },
   { key: 'trazabilidad', label: 'Trazabilidad', description: 'Seguimiento de entregas y registro de envios.' }
 ];
+// ## Fin catalogo de modulos administrables y su descripcion
 
+// ## Switch reutilizable para toggles de permisos
 const PermissionSwitch = ({ label, checked, onToggle, disabled }) => (
   <button
     type="button"
@@ -22,21 +25,30 @@ const PermissionSwitch = ({ label, checked, onToggle, disabled }) => (
     {checked ? 'Activo' : 'Inactivo'}
   </button>
 );
+// ## Fin switch reutilizable para toggles de permisos
 
+// ## Panel de administracion de usuarios y permisos
 export default function AdminDashboard() {
+  // ## Estado de usuarios, seleccion, flags de carga y feedback
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  // ## Fin estado de usuarios, seleccion, flags de carga y feedback
 
+  // ## Usuario seleccionado memoizado
   const selectedUser = useMemo(() => users.find((user) => user._id === selectedUserId), [users, selectedUserId]);
+  // ## Fin usuario seleccionado memoizado
 
+  // ## Helper para mostrar feedback temporal
   const showFeedback = (message, type = 'info') => {
     setFeedback({ message, type });
     setTimeout(() => setFeedback(null), 3000);
   };
+  // ## Fin helper para mostrar feedback temporal
 
+  // ## Carga inicial de usuarios
   const loadUsers = async () => {
     setLoading(true);
     try {
@@ -52,15 +64,19 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
+  // ## Fin carga inicial de usuarios
 
   useEffect(() => {
     loadUsers();
   }, []);
 
+  // ## Actualizar usuario en memoria
   const updateUserInState = (id, partial) => {
     setUsers((prev) => prev.map((user) => (user._id === id ? { ...user, ...partial } : user)));
   };
+  // ## Fin actualizar usuario en memoria
 
+  // ## Alternar rol entre admin, user y cliente
   const toggleRole = async (user) => {
     setSaving(true);
     try {
@@ -77,7 +93,9 @@ export default function AdminDashboard() {
       setSaving(false);
     }
   };
+  // ## Fin alternar rol entre admin, user y cliente
 
+  // ## Alternar permisos de vista/edicion por modulo
   const togglePermission = async (section, field) => {
     if (!selectedUser) return;
     const current = selectedUser.permissions?.[section] || { view: false, edit: false };
@@ -106,6 +124,7 @@ export default function AdminDashboard() {
       setSaving(false);
     }
   };
+  // ## Fin alternar permisos de vista/edicion por modulo
 
   if (loading) {
     return (
@@ -231,3 +250,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+// ## Fin panel de administracion de usuarios y permisos

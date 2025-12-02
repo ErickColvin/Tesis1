@@ -1,5 +1,6 @@
 import React from 'react';
 
+// ## Componente de mensaje para accesos restringidos
 export default function AccessDenied({ label = 'esta seccion' }) {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
@@ -15,3 +16,4 @@ export default function AccessDenied({ label = 'esta seccion' }) {
     </div>
   );
 }
+// ## Fin componente de mensaje para accesos restringidos

@@ -1,3 +1,4 @@
+// Servicio de importacion desde Excel para productos y paquetes.
 import ExcelJS from 'exceljs';
 import { ValidationService } from './validation.service.js';
 import { ProductRepository } from '../repositories/product.repository.js';
@@ -125,6 +126,7 @@ export class ImportService {
       if (typeof product.stock !== 'number' || typeof product.minStock !== 'number') continue;
       if (product.stock > product.minStock) continue;
       try {
+        // Mantiene alertas alineadas despues de importaciones masivas.
         await Alert.findOneAndUpdate(
           { productSku: product.sku },
           {

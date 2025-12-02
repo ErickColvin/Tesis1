@@ -1,3 +1,4 @@
+// Repository de paquetes: encapsula accesos a la coleccion Package.
 import Package from '../models/package.model.js';
 
 /**

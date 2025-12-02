@@ -1,3 +1,4 @@
+// Rutas de entregas/paqueteria con proteccion por rol.
 import express from 'express';
 import {
   listDeliveries,

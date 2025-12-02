@@ -4,21 +4,27 @@ import api from '../services/api';
 
 const MIN_PASSWORD_LENGTH = 6;
 
+// ## Pantalla para registrar nuevos usuarios
 export default function Register() {
+  // ## Estado local para formulario, mensajes y controles de UI
   const [form, setForm] = useState({ email: '', password: '', confirm: '' });
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
+  // ## Fin estado local para formulario, mensajes y controles de UI
 
+  // ## Actualizar campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+  // ## Fin actualizar campos del formulario
 
+  // ## Validar correo y contrasenas antes de enviar
   const validate = () => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(form.email)) {
       return 'Ingresa un correo valido';
     }
     if (form.password.length < MIN_PASSWORD_LENGTH) {
@@ -29,7 +35,9 @@ export default function Register() {
     }
     return null;
   };
+  // ## Fin validar correo y contrasenas antes de enviar
 
+  // ## Enviar registro al backend y redirigir al login
   const submit = async (e) => {
     e.preventDefault();
     const validationError = validate();
@@ -51,7 +59,9 @@ export default function Register() {
       setLoading(false);
     }
   };
+  // ## Fin enviar registro al backend y redirigir al login
 
+  // ## Render del formulario de registro y enlaces complementarios
   return (
     <div className="glass-panel p-10 space-y-6 animate-fade-in">
       <div className="text-center space-y-3">
@@ -85,7 +95,7 @@ export default function Register() {
               type={showPassword ? 'text' : 'password'}
               value={form.password}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder="********"
               className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-10 text-white transition focus:border-amber-400 focus:outline-none"
               required
               disabled={loading}
@@ -110,7 +120,7 @@ export default function Register() {
               type={showConfirm ? 'text' : 'password'}
               value={form.confirm}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder="********"
               className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-10 text-white transition focus:border-amber-400 focus:outline-none"
               required
               disabled={loading}
@@ -152,3 +162,4 @@ export default function Register() {
     </div>
   );
 }
+// ## Fin pantalla para registrar nuevos usuarios

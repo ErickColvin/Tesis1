@@ -1,3 +1,4 @@
+// Devoluciones provenientes de marketplaces y su seguimiento.
 import mongoose from 'mongoose';
 
 const returnSchema = new mongoose.Schema(

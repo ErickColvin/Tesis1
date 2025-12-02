@@ -1,3 +1,4 @@
+// Middleware de autenticacion y control de rol admin.
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 

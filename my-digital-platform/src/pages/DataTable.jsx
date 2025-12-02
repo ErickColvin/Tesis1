@@ -4,12 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { DataContext } from "../context/DataContext";
 import api from "../services/api";
 
+// ## Plantilla base para producto vacio
 const emptyProduct = { producto: "", categoria: "", stock: "", stock_limit: "", precio: "" };
+// ## Fin plantilla base para producto vacio
 
+// ## Tabla de productos con filtros, alta y edicion
 const DataTable = ({ allowEdit = false }) => {
   const { products: contextProducts } = useContext(DataContext) || { products: [] };
   const navigate = useNavigate();
 
+  // ## Estado local para filtros, paginacion y formularios
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -23,9 +27,13 @@ const DataTable = ({ allowEdit = false }) => {
   const [fetching, setFetching] = useState(false);
   const [editing, setEditing] = useState({ open: false, product: null, form: {}, saving: false });
   const perPage = 20;
+  // ## Fin estado local para filtros, paginacion y formularios
 
+  // ## Helper para mostrar mensajes en pantalla
   const notify = (type, text) => setMsg({ type, text });
+  // ## Fin helper para mostrar mensajes en pantalla
 
+  // ## Consulta a la API para traer productos con filtros
   const loadProducts = async () => {
     setFetching(true);
     try {
@@ -47,11 +55,15 @@ const DataTable = ({ allowEdit = false }) => {
       setFetching(false);
     }
   };
+  // ## Fin consulta a la API para traer productos con filtros
 
+  // ## Recargar tabla cuando cambian filtros o pagina
   useEffect(() => {
     loadProducts();
   }, [page, search, category]);
+  // ## Fin recargar tabla cuando cambian filtros o pagina
 
+  // ## Alta masiva de productos desde modal
   const handleAddItems = async (e) => {
     e.preventDefault();
     if (!allowEdit) {
@@ -94,7 +106,9 @@ const DataTable = ({ allowEdit = false }) => {
       setLoading(false);
     }
   };
+  // ## Fin alta masiva de productos desde modal
 
+  // ## Preparar formulario de edicion de producto
   const openEditModal = (product) => {
     if (!allowEdit) {
       notify("error", "Solo los administradores pueden editar productos.");
@@ -114,7 +128,9 @@ const DataTable = ({ allowEdit = false }) => {
       }
     });
   };
+  // ## Fin preparar formulario de edicion de producto
 
+  // ## Guardar cambios del modal de edicion
   const saveEdit = async () => {
     if (!editing.product) return;
     const sku = (editing.product.sku || editing.product._id || editing.product.id || "").toString();
@@ -146,9 +162,13 @@ const DataTable = ({ allowEdit = false }) => {
       setEditing((prev) => ({ ...prev, saving: false }));
     }
   };
+  // ## Fin guardar cambios del modal de edicion
 
+  // ## Categorias derivadas para filtro rapido
   const categories = [...new Set(products.map((p) => p.categoria).filter(Boolean))];
+  // ## Fin categorias derivadas para filtro rapido
 
+  // ## Manejo de inputs dinamicos para nuevos productos
   const handleAddItemChange = (index, field, value) => {
     const next = [...addItems];
     next[index] = { ...next[index], [field]: value };
@@ -164,7 +184,9 @@ const DataTable = ({ allowEdit = false }) => {
     }
     setAddItems(next);
   };
+  // ## Fin manejo de inputs dinamicos para nuevos productos
 
+  // ## Render principal con filtros, tabla, paginacion y modales
   return (
     <div className="p-6 text-white space-y-6">
       <header className="flex flex-wrap gap-4 items-center justify-between">
@@ -540,4 +562,5 @@ const DataTable = ({ allowEdit = false }) => {
   );
 };
 
+// ## Fin tabla de productos con filtros, alta y edicion
 export default DataTable;

@@ -1,3 +1,4 @@
+// Rutas de alertas: lectura publica y configuracion/resolve para admins.
 import express from 'express';
 import {
   listAlerts,

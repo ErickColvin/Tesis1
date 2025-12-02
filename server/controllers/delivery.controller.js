@@ -1,6 +1,8 @@
+// Controlador de entregas: CRUD de envios y filtros de estado.
 import mongoose from 'mongoose';
 import Delivery from '../models/delivery.model.js';
 
+// Acepta ids legibles o ObjectId para reutilizar filtros en todas las acciones.
 const buildDeliveryFilter = (identifier) => {
   const or = [{ id: identifier }];
   if (mongoose.Types.ObjectId.isValid(identifier)) {
@@ -72,6 +74,7 @@ export async function createDelivery(req, res) {
 
     // Generar ID único
     const id = `DEL-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // ID corto para mostrar en UI sin exponer el ObjectId de Mongo.
 
     const delivery = await Delivery.create({
       id,

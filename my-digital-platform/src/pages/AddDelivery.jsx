@@ -53,9 +53,9 @@ export default function AddDelivery() {
   };
   // ## Fin funcion para enviar formulario y crear delivery
 
+  // ## Render principal del formulario de entrega
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* ## Cabecera con resumen de la vista */}
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-[0.4em] text-amber-300/70">Entregas</p>
         <h1 className="text-3xl font-semibold text-white">Registrar pedido</h1>
@@ -63,9 +63,7 @@ export default function AddDelivery() {
           Completa los detalles del envio para seguirlo en trazabilidad y generar alertas de stock.
         </p>
       </header>
-      {/* ## Fin cabecera con resumen de la vista */}
 
-      {/* ## Mensaje de retroalimentacion para errores o exito */}
       {msg && (
         <div
           className={`rounded-2xl px-5 py-3 text-sm ${
@@ -77,9 +75,7 @@ export default function AddDelivery() {
           {msg.text}
         </div>
       )}
-      {/* ## Fin mensaje de retroalimentacion para errores o exito */}
 
-      {/* ## Formulario para registrar nueva entrega */}
       <form onSubmit={handleSubmit} className="glass-panel p-8 grid gap-6 md:grid-cols-2">
         <div>
           <label className="text-sm text-gray-300">Nombre de la persona *</label>
@@ -128,7 +124,7 @@ export default function AddDelivery() {
             required
           >
             <option value="pendiente">Pendiente</option>
-            <option value="en_preparacion">En preparación</option>
+            <option value="en_preparacion">En preparacion</option>
             <option value="en_camino">En camino</option>
             <option value="entregado">Entregado</option>
             <option value="cancelado">Cancelado</option>
@@ -155,7 +151,7 @@ export default function AddDelivery() {
         </div>
 
         <div className="md:col-span-2">
-          <label className="text-sm text-gray-300">Direcci�n *</label>
+          <label className="text-sm text-gray-300">Direccion *</label>
           <input
             type="text"
             name="direccion"
@@ -195,10 +191,7 @@ export default function AddDelivery() {
           </button>
         </div>
       </form>
-      {/* ## Fin formulario para registrar nueva entrega */}
     </div>
   );
 }
 // ## Fin componente para registrar una entrega
-
-

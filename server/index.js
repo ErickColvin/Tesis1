@@ -1,3 +1,4 @@
+// Servidor Express principal que conecta MongoDB y expone todas las rutas de la API.
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
