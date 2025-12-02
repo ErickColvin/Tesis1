@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+// ## Pantalla de bienvenida con accesos rapidos
 const Home = ({ user }) => {
+  // ## Determina si el usuario tiene rol administrador
   const isAdmin = user?.role === 'admin';
 
+  // ## Configuracion de botones segun rol
   const buttons = isAdmin
     ? [
         {
@@ -39,7 +42,9 @@ const Home = ({ user }) => {
             'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white'
         }
       ];
+  // ## Fin configuracion de botones segun rol
 
+  // ## Render principal con accesos y mensajes
   return (
     <div className="p-6 text-center text-white">
       <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-amber-300 to-rose-400 bg-clip-text text-transparent">
@@ -63,5 +68,6 @@ const Home = ({ user }) => {
     </div>
   );
 };
+// ## Fin pantalla de bienvenida con accesos rapidos
 
 export default Home;

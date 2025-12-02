@@ -1,3 +1,4 @@
+// Rutas para gestionar devoluciones de marketplaces.
 import express from 'express';
 import { listReturns, createReturn, updateReturn } from '../controllers/return.controller.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';

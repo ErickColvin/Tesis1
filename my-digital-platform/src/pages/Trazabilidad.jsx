@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 
+// ## Configuracion de estados y estilos de badges
 const STATUS_CONFIG = {
   pendiente: { label: 'Pendiente', badge: 'bg-amber-500/20 text-amber-200 border border-amber-500/50', dot: 'bg-amber-400' },
   en_preparacion: { label: 'En preparacion', badge: 'bg-sky-500/20 text-sky-200 border border-sky-500/50', dot: 'bg-sky-400' },
@@ -11,7 +12,9 @@ const STATUS_CONFIG = {
 
 const STATUS_ORDER = ['', 'pendiente', 'en_preparacion', 'en_camino', 'entregado', 'cancelado'];
 const STATUS_OPTIONS = STATUS_ORDER.filter(Boolean);
+// ## Fin configuracion de estados y estilos de badges
 
+// ## Chip visual para mostrar estado de una entrega
 const StatusBadge = ({ status }) => {
   const cfg = STATUS_CONFIG[status] || { label: status, badge: 'bg-white/10 text-gray-200 border border-white/10', dot: 'bg-gray-400' };
   return (
@@ -21,8 +24,11 @@ const StatusBadge = ({ status }) => {
     </span>
   );
 };
+// ## Fin chip visual para mostrar estado de una entrega
 
+// ## Panel de trazabilidad de entregas con filtros y edicion
 export default function Trazabilidad({ allowEdit = false }) {
+  // ## Estado para entregas, filtros, modales y configuracion de alertas
   const [deliveries, setDeliveries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('');
@@ -42,16 +48,22 @@ export default function Trazabilidad({ allowEdit = false }) {
   const [error, setError] = useState(null);
   const [feedback, setFeedback] = useState(null);
   const [editor, setEditor] = useState({ open: false, delivery: null, form: {} });
+  // ## Fin estado para entregas, filtros, modales y configuracion de alertas
 
+  // ## Carga de entregas al cambiar filtros o pagina
   useEffect(() => {
     loadDeliveries();
   }, [page, filterStatus, searchText]);
+  // ## Fin carga de entregas al cambiar filtros o pagina
 
+  // ## Carga de configuracion de alertas al abrir modal
   useEffect(() => {
     if (!showAlertConfigModal || !allowEdit) return;
     loadAlertConfiguration();
   }, [showAlertConfigModal, allowEdit]);
+  // ## Fin carga de configuracion de alertas al abrir modal
 
+  // ## Consulta de entregas con paginacion y filtros
   const loadDeliveries = async () => {
     try {
       setLoading(true);
@@ -73,12 +85,16 @@ export default function Trazabilidad({ allowEdit = false }) {
       setLoading(false);
     }
   };
+  // ## Fin consulta de entregas con paginacion y filtros
 
+  // ## Cambio rapido de filtro de estado
   const handleStatusFilterChange = (status) => {
     setFilterStatus(status);
     setPage(1);
   };
+  // ## Fin cambio rapido de filtro de estado
 
+  // ## Obtener configuracion actual de alertas
   const loadAlertConfiguration = async () => {
     setConfigLoading(true);
     try {
@@ -96,7 +112,9 @@ export default function Trazabilidad({ allowEdit = false }) {
       setConfigLoading(false);
     }
   };
+  // ## Fin obtener configuracion actual de alertas
 
+  // ## Activar o desactivar estado monitoreado para alertas
   const toggleStatusSelection = (status) => {
     setAlertConfig((prev) => {
       const exists = prev.notifyStatuses?.includes(status);
@@ -106,7 +124,9 @@ export default function Trazabilidad({ allowEdit = false }) {
       return { ...prev, notifyStatuses: updated };
     });
   };
+  // ## Fin activar o desactivar estado monitoreado para alertas
 
+  // ## Guardar configuracion de alertas en servidor
   const saveAlertConfig = async () => {
     setSavingAlertConfig(true);
     try {
@@ -130,14 +150,18 @@ export default function Trazabilidad({ allowEdit = false }) {
       setSavingAlertConfig(false);
     }
   };
+  // ## Fin guardar configuracion de alertas en servidor
 
+  // ## Formateo de fechas para inputs datetime-local
   const formatInputValue = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     const iso = date.toISOString();
     return iso.slice(0, 16);
   };
+  // ## Fin formateo de fechas para inputs datetime-local
 
+  // ## Apertura de modal de edicion con datos normalizados
   const openEditModal = (delivery) => {
     if (!delivery) return;
     setEditor({
@@ -155,13 +179,19 @@ export default function Trazabilidad({ allowEdit = false }) {
       }
     });
   };
+  // ## Fin apertura de modal de edicion con datos normalizados
 
+  // ## Cerrar modal de edicion
   const closeEditor = () => setEditor({ open: false, delivery: null, form: {} });
+  // ## Fin cerrar modal de edicion
 
+  // ## Actualizar campos en formulario de edicion
   const updateEditForm = (field, value) => {
     setEditor((prev) => ({ ...prev, form: { ...prev.form, [field]: value } }));
   };
+  // ## Fin actualizar campos en formulario de edicion
 
+  // ## Guardar cambios de una entrega editada
   const handleEditorSave = async () => {
     if (!editor.delivery) return;
     const targetId = editor.delivery.id || editor.delivery._id;
@@ -193,13 +223,17 @@ export default function Trazabilidad({ allowEdit = false }) {
       setFeedback({ type: 'error', message: msg });
     }
   };
+  // ## Fin guardar cambios de una entrega editada
 
+  // ## Limpieza automatica de mensajes temporales
   useEffect(() => {
     if (!feedback) return;
     const timeout = setTimeout(() => setFeedback(null), 4000);
     return () => clearTimeout(timeout);
   }, [feedback]);
+  // ## Fin limpieza automatica de mensajes temporales
 
+  // ## Formato legible de fecha de entrega
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
@@ -211,14 +245,18 @@ export default function Trazabilidad({ allowEdit = false }) {
       minute: '2-digit'
     });
   };
+  // ## Fin formato legible de fecha de entrega
 
+  // ## Reducir IDs largos para mostrarlos en tabla
   const formatDisplayId = (value) => {
     if (!value) return '-';
     const text = String(value).trim();
     const shortened = text.slice(0, 8);
     return shortened.length >= 3 ? shortened : text;
   };
+  // ## Fin reducir IDs largos para mostrarlos en tabla
 
+  // ## Busqueda y conteo resumido por estado
   const normalizedSearch = searchText.trim().toLowerCase();
   const filteredDeliveries = deliveries.filter((delivery) => {
     if (!normalizedSearch) return true;
@@ -245,7 +283,9 @@ export default function Trazabilidad({ allowEdit = false }) {
     label: STATUS_CONFIG[key]?.label || key,
     count: filteredDeliveries.filter((delivery) => delivery.status === key).length
   }));
+  // ## Fin busqueda y conteo resumido por estado
 
+  // ## Render principal con filtros, tabla y modales de configuracion
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
@@ -695,3 +735,4 @@ export default function Trazabilidad({ allowEdit = false }) {
     </div>
   );
 }
+// ## Fin panel de trazabilidad de entregas con filtros y edicion

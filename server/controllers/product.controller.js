@@ -3,6 +3,7 @@ import Product from "../models/product.model.js";
 import Alert from "../models/alert.model.js";
 import { notifyLowStock } from "../services/notification.service.js";
 
+// Endpoints para crear, listar y actualizar productos manteniendo alertas de stock.
 /**
  * POST /api/products
  * Crea uno o varios productos (max 5)
@@ -47,6 +48,7 @@ export async function createProducts(req, res) {
         results.push(product);
 
         if (product.stock <= product.minStock) {
+          // Levanta o reactiva alerta cuando el stock inicial ya esta en nivel critico.
           await Alert.findOneAndUpdate(
             { productSku: product.sku },
             {

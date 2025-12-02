@@ -1,3 +1,4 @@
+// Modelo de entregas/shipments para trazabilidad.
 import mongoose from 'mongoose';
 
 const deliverySchema = new mongoose.Schema({

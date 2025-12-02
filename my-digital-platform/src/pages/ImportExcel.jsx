@@ -1,7 +1,8 @@
-﻿import React, { useContext, useMemo, useRef, useState } from 'react';
+import React, { useContext, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataContext } from '../context/DataContext';
 
+// ## Configuracion de tipos de carga y textos de ayuda
 const TYPE_OPTIONS = [
   { value: 'products', label: 'Productos', description: 'Actualiza SKUs de Mercado Libre, stock y precios.' },
   { value: 'packages', label: 'Paquetes', description: 'Controla codigos logisticos.' }
@@ -45,18 +46,23 @@ const CHECKLIST = [
   'Creacion/actualizacion en base de datos y regeneracion de alertas.',
   'Notificacion automatica por correo al completar la carga.'
 ];
+
 const STATUS_STYLES = {
   success: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100',
   info: 'border-sky-500/30 bg-sky-500/10 text-sky-100',
   warning: 'border-amber-500/30 bg-amber-500/10 text-amber-100',
   error: 'border-rose-500/30 bg-rose-500/10 text-rose-100'
 };
+// ## Fin configuracion de tipos de carga y textos de ayuda
 
+// ## Utilidad de formato numerico para estadisticas
 const formatNumber = (value) => {
   if (value === null || value === undefined) return '0';
   return new Intl.NumberFormat('es-PE').format(value);
 };
+// ## Fin utilidad de formato numerico para estadisticas
 
+// ## Tarjeta resumida para metrica de carga
 const SummaryCard = ({ label, value, accent = 'from-orange-500 to-rose-500' }) => (
   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
     <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{label}</p>
@@ -65,7 +71,9 @@ const SummaryCard = ({ label, value, accent = 'from-orange-500 to-rose-500' }) =
     </p>
   </div>
 );
+// ## Fin tarjeta resumida para metrica de carga
 
+// ## Mensaje compacto de estado o error
 const FeedbackMessage = ({ feedback }) => {
   if (!feedback) return null;
   const style = STATUS_STYLES[feedback.type] || STATUS_STYLES.info;
@@ -75,7 +83,9 @@ const FeedbackMessage = ({ feedback }) => {
     </div>
   );
 };
+// ## Fin mensaje compacto de estado o error
 
+// ## Tabla de errores detectados en la carga
 const ErrorList = ({ errors }) => {
   if (!errors?.length) return null;
   return (
@@ -107,10 +117,14 @@ const ErrorList = ({ errors }) => {
     </div>
   );
 };
+// ## Fin tabla de errores detectados en la carga
 
+// ## Pantalla de importacion de Excel para inventarios
 const ImportExcel = ({ allowEdit = true }) => {
   const navigate = useNavigate();
   const { uploadExcel } = useContext(DataContext) || {};
+
+  // ## Estado para archivo, tipo, progreso y mensajes
   const [file, setFile] = useState(null);
   const [type, setType] = useState('products');
   const [progress, setProgress] = useState(0);
@@ -119,10 +133,14 @@ const ImportExcel = ({ allowEdit = true }) => {
   const [errors, setErrors] = useState([]);
   const [feedback, setFeedback] = useState(null);
   const fileInputRef = useRef(null);
+  // ## Fin estado para archivo, tipo, progreso y mensajes
 
+  // ## Datos derivados segun el tipo de carga elegido
   const requiredHeaders = useMemo(() => TEMPLATE_ROWS[type][0], [type]);
   const validationRules = VALIDATION_RULES[type];
+  // ## Fin datos derivados segun el tipo de carga elegido
 
+  // ## Seleccion y limpieza de archivo local
   const handleFileChange = (event) => {
     setFeedback(null);
     const newFile = event.target.files?.[0];
@@ -135,11 +153,17 @@ const ImportExcel = ({ allowEdit = true }) => {
       fileInputRef.current.value = '';
     }
   };
+// ## Fin seleccion y limpieza de archivo local
 
-  const downloadTemplate = () => {
-    const rows = TEMPLATE_ROWS[type];
-    const csv = rows.map((row) => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+// ## Descarga de plantilla CSV segun tipo
+const downloadTemplate = () => {
+  const rows = TEMPLATE_ROWS[type];
+  const separator = ';'; // Excel en ES usa ; como separador cuando los decimales llevan coma
+  const csvBody = rows
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(separator))
+    .join('\n');
+  const csv = `\ufeff${csvBody}`; // BOM para que Excel detecte UTF-8 y columnas
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -147,7 +171,9 @@ const ImportExcel = ({ allowEdit = true }) => {
     link.click();
     URL.revokeObjectURL(url);
   };
+  // ## Fin descarga de plantilla CSV segun tipo
 
+  // ## Envio de archivo al backend y manejo de feedback
   const handleSubmit = async (event) => {
     event.preventDefault();
     setFeedback(null);
@@ -155,7 +181,7 @@ const ImportExcel = ({ allowEdit = true }) => {
     setErrors([]);
 
     if (!allowEdit) {
-      setFeedback({ type: 'error', message: 'Solo lectura: solicita permisos de edición para cargar inventario.' });
+      setFeedback({ type: 'error', message: 'Solo lectura: solicita permisos de edicion para cargar inventario.' });
       return;
     }
 
@@ -165,7 +191,7 @@ const ImportExcel = ({ allowEdit = true }) => {
     }
 
     if (!uploadExcel) {
-      setFeedback({ type: 'error', message: 'Servicio de carga no disponible. Refresca la página.' });
+      setFeedback({ type: 'error', message: 'Servicio de carga no disponible. Refresca la pagina.' });
       return;
     }
 
@@ -184,7 +210,7 @@ const ImportExcel = ({ allowEdit = true }) => {
       setFeedback({
         type: hasWarnings ? 'warning' : 'success',
         message: hasWarnings
-          ? `Carga completada con ${payloadSummary.rowsOk} filas válidas y ${payloadSummary.rowsError} observaciones.`
+          ? `Carga completada con ${payloadSummary.rowsOk} filas validas y ${payloadSummary.rowsError} observaciones.`
           : 'Inventario actualizado correctamente. No se detectaron errores.'
       });
     } catch (err) {
@@ -200,12 +226,14 @@ const ImportExcel = ({ allowEdit = true }) => {
       setTimeout(() => setProgress(0), 900);
     }
   };
+  // ## Fin envio de archivo al backend y manejo de feedback
 
+  // ## Tarjetas de resumen derivadas de la respuesta
   const summaryCards = useMemo(() => {
     if (!summary) return [];
     return [
       { label: 'Total filas procesadas', value: summary.rowsTotal, accent: 'from-amber-400 to-rose-500' },
-      { label: 'Filas válidas', value: summary.rowsOk, accent: 'from-emerald-400 to-lime-500' },
+      { label: 'Filas validas', value: summary.rowsOk, accent: 'from-emerald-400 to-lime-500' },
       { label: 'Filas con error', value: summary.rowsError, accent: 'from-amber-500 to-orange-600' },
       { label: 'Productos creados', value: summary.productsCreated, accent: 'from-rose-400 to-pink-500' },
       { label: 'Productos actualizados', value: summary.productsUpdated, accent: 'from-orange-400 to-amber-500' },
@@ -213,7 +241,9 @@ const ImportExcel = ({ allowEdit = true }) => {
       { label: 'Paquetes actualizados', value: summary.packagesUpdated, accent: 'from-rose-400 to-red-500' }
     ].filter((item) => item.value !== undefined && item.value !== null);
   }, [summary]);
+  // ## Fin tarjetas de resumen derivadas de la respuesta
 
+  // ## Render principal de la pantalla de importacion
   return (
     <div className="space-y-6">
       <header className="space-y-3">
@@ -324,7 +354,7 @@ const ImportExcel = ({ allowEdit = true }) => {
           <div>
             <p className="text-sm font-semibold text-white">Plantilla de referencia</p>
             <p className="text-xs text-gray-400">
-              Cabeceras detectadas automáticamente. Puedes renombrarlas o usar sin acentos.
+              Cabeceras detectadas automaticamente. Puedes renombrarlas o usar sin acentos.
             </p>
             <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
               <table className="min-w-full text-xs text-gray-200">
@@ -363,7 +393,7 @@ const ImportExcel = ({ allowEdit = true }) => {
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-white">Reglas de validación</p>
+            <p className="text-sm font-semibold text-white">Reglas de validacion</p>
             <ul className="mt-3 space-y-2 text-sm text-gray-300">
               {validationRules.map((rule) => (
                 <li key={rule} className="flex items-start gap-2">
@@ -390,6 +420,6 @@ const ImportExcel = ({ allowEdit = true }) => {
     </div>
   );
 };
+// ## Fin pantalla de importacion de Excel para inventarios
 
 export default ImportExcel;
-

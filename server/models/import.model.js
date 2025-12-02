@@ -1,3 +1,4 @@
+// Registro historico de importaciones con conteos y errores.
 import mongoose from 'mongoose';
 
 const importSchema = new mongoose.Schema({

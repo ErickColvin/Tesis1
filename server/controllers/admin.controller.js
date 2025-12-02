@@ -1,3 +1,4 @@
+// Controlador de administracion: gestiona usuarios, roles y permisos granulares.
 import User, { PERMISSION_SECTIONS } from '../models/user.model.js';
 
 export async function listUsers(req, res) {
@@ -21,6 +22,7 @@ export async function updateRole(req, res) {
       const target = await User.findById(id, 'role');
       if (!target) return res.status(404).json({ message: 'not_found' });
       if (target.role === 'admin') {
+        // Evita dejar el sistema sin al menos un admin activo.
         const adminCount = await User.countDocuments({ role: 'admin' });
         if (adminCount <= 1) {
           return res.status(400).json({ message: 'must_have_one_admin' });

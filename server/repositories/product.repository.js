@@ -1,3 +1,4 @@
+// Repository para encapsular queries de productos.
 import Product from '../models/product.model.js';
 
 /**

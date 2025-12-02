@@ -2,14 +2,18 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api, { setAuthToken } from '../services/api';
 
+// ## Pantalla de inicio de sesion y autenticacion
 export default function Login({ onLogin }) {
+  // ## Estado local para credenciales, mensajes y loading
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  // ## Fin estado local para credenciales, mensajes y loading
 
+  // ## Funcion auxiliar para decodificar token y obtener rol/correo
   const parseToken = (token) => {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -18,7 +22,9 @@ export default function Login({ onLogin }) {
       return null;
     }
   };
+  // ## Fin funcion auxiliar para decodificar token y obtener rol/correo
 
+  // ## Envio de formulario para autenticar y guardar sesion
   async function submit(e) {
     e.preventDefault();
     setMsg(null);
@@ -46,7 +52,9 @@ export default function Login({ onLogin }) {
       setLoading(false);
     }
   }
+  // ## Fin envio de formulario para autenticar y guardar sesion
 
+  // ## Render del formulario de login y accesos adicionales
   return (
     <div className="glass-panel p-10 space-y-6 animate-fade-in">
       <div className="text-center space-y-3">
@@ -76,7 +84,7 @@ export default function Login({ onLogin }) {
               type={showPassword ? 'text' : 'password'}
               value={pass}
               onChange={(e) => setPass(e.target.value)}
-              placeholder="••••••••"
+              placeholder="********"
               className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-10 text-white transition focus:border-amber-400 focus:outline-none"
               required
               disabled={loading}
@@ -118,3 +126,4 @@ export default function Login({ onLogin }) {
     </div>
   );
 }
+// ## Fin pantalla de inicio de sesion y autenticacion

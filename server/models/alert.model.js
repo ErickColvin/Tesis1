@@ -1,3 +1,4 @@
+// Modelo de alertas de stock asociadas a productos.
 import mongoose from 'mongoose';
 
 const alertSchema = new mongoose.Schema({

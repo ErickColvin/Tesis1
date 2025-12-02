@@ -1,3 +1,4 @@
+// Controlador de importaciones: recibe archivos y expone logs de cargas.
 import Import from '../models/import.model.js';
 import { ImportService } from '../services/import.service.js';
 import { notifyImportSummary } from '../services/notification.service.js';
@@ -28,6 +29,7 @@ export async function importData(req, res) {
     }
 
     // Guardar registro de importación
+    // Resumen compacto para guardar en BD y enviar por correo.
     const summary = {
       rowsTotal: result.rowsTotal,
       rowsOk: result.rowsOk,

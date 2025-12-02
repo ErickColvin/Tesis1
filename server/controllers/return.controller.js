@@ -1,3 +1,4 @@
+// Controlador de devoluciones: CRUD de casos de MercadoLibre.
 import Return from '../models/return.model.js';
 
 export async function listReturns(req, res) {
@@ -84,6 +85,7 @@ export async function updateReturn(req, res) {
       'fechaRecoleccion'
     ];
 
+    // Construye objeto solo con campos permitidos para evitar sobrescrituras accidentales.
     const updates = {};
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) {

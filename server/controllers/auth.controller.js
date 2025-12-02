@@ -1,3 +1,4 @@
+// Controlador de autenticacion: registro, login y perfil JWT.
 import User from '../models/user.model.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -106,6 +107,7 @@ export async function login(req, res) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
+    // Garantiza que el usuario maestro mantenga privilegios admin aunque se altere el rol.
     if (user.email === ROOT_ADMIN_EMAIL && user.role !== 'admin') {
       user.role = 'admin';
       await user.save();

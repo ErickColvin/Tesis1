@@ -1,3 +1,4 @@
+// Productos disponibles en inventario con stock y precios.
 import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({

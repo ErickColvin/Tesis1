@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
 
+// ## Configuracion de estados y etiquetas para pedidos
 const STATUS_CONFIG = {
   pendiente: { label: 'Pendiente', badge: 'bg-amber-500/20 text-amber-200 border border-amber-500/50', dot: 'bg-amber-400' },
   en_preparacion: { label: 'En preparacion', badge: 'bg-sky-500/20 text-sky-200 border border-sky-500/50', dot: 'bg-sky-400' },
@@ -14,7 +15,9 @@ const RETURN_RESULTS = [
   { value: 'para_revision', label: 'Enviar a revision' },
   { value: 'descartado', label: 'Descartar' }
 ];
+// ## Fin configuracion de estados y etiquetas para pedidos
 
+// ## Chip visual para estados de pedidos
 const StatusPill = ({ status }) => {
   const cfg = STATUS_CONFIG[status] || { label: status, badge: 'bg-white/10 text-gray-200 border border-white/10', dot: 'bg-gray-400' };
   return (
@@ -24,7 +27,9 @@ const StatusPill = ({ status }) => {
     </span>
   );
 };
+// ## Fin chip visual para estados de pedidos
 
+// ## Utilidades de formato para fechas, moneda e IDs
 const formatDate = (value, withTime = false) => {
   if (!value) return '-';
   const date = new Date(value);
@@ -52,8 +57,11 @@ const extractAmount = (order) => {
   }
   return 0;
 };
+// ## Fin utilidades de formato para fechas, moneda e IDs
 
+// ## Vista cliente con resumen de pedidos y devoluciones
 export default function ClientView({ allowEdit = true }) {
+  // ## Estado para datos, feedback, filtros y modal de edicion
   const [deliveries, setDeliveries] = useState([]);
   const [returnsList, setReturnsList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +75,9 @@ export default function ClientView({ allowEdit = true }) {
     saving: false,
     form: { direccion: '', fechaEntregaEstimada: '' }
   });
+  // ## Fin estado para datos, feedback, filtros y modal de edicion
 
+  // ## Consulta de pedidos y devoluciones para el cliente
   const loadData = async () => {
     setLoading(true);
     setFeedback(null);
@@ -86,11 +96,15 @@ export default function ClientView({ allowEdit = true }) {
       setLoading(false);
     }
   };
+  // ## Fin consulta de pedidos y devoluciones para el cliente
 
+  // ## Carga inicial al montar la vista
   useEffect(() => {
     loadData();
   }, []);
+  // ## Fin carga inicial al montar la vista
 
+  // ## Estadisticas del mes actual
   const monthStats = useMemo(() => {
     const now = new Date();
     const sameMonth = (date) => date && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
@@ -106,7 +120,9 @@ export default function ClientView({ allowEdit = true }) {
       spent
     };
   }, [deliveries, returnsList]);
+  // ## Fin estadisticas del mes actual
 
+  // ## Abrir modal de edicion de entrega
   const openEdit = (delivery) => {
     if (!allowEdit) return;
     setEditModal({
@@ -121,7 +137,9 @@ export default function ClientView({ allowEdit = true }) {
       }
     });
   };
+  // ## Fin abrir modal de edicion de entrega
 
+  // ## Guardar cambios de direccion o fecha de entrega
   const saveEdit = async () => {
     if (!editModal.record) return;
     const targetId = editModal.record.id || editModal.record._id;
@@ -155,6 +173,7 @@ export default function ClientView({ allowEdit = true }) {
       setEditModal((prev) => ({ ...prev, saving: false }));
     }
   };
+  // ## Fin guardar cambios de direccion o fecha de entrega
 
   const summaryCards = [
     { label: 'Pedidos del mes', value: monthStats.ordersCount, tone: 'from-emerald-500 to-lime-500' },
@@ -162,6 +181,7 @@ export default function ClientView({ allowEdit = true }) {
     { label: 'Gasto estimado', value: formatCurrency(monthStats.spent), tone: 'from-sky-500 to-indigo-500' }
   ];
 
+  // ## Filtros para tabla de devoluciones
   const normalizedReturnSearch = returnsSearch.trim().toLowerCase();
   const filteredReturns = returnsList.filter((item) => {
     if (returnsStatus && item.resultado !== returnsStatus) return false;
@@ -179,7 +199,9 @@ export default function ClientView({ allowEdit = true }) {
       .toLowerCase();
     return haystack.includes(normalizedReturnSearch);
   });
+  // ## Fin filtros para tabla de devoluciones
 
+  // ## Render principal de la vista del cliente
   return (
     <div className="space-y-6">
       <header className="space-y-2">
@@ -413,3 +435,4 @@ export default function ClientView({ allowEdit = true }) {
     </div>
   );
 }
+// ## Fin vista cliente con resumen de pedidos y devoluciones

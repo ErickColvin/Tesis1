@@ -1,3 +1,4 @@
+// Servicio de notificaciones: arma correos y los envia via email.service.
 import {
   ensureAlertConfig,
   withDefaultRecipient

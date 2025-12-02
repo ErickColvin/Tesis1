@@ -1,3 +1,4 @@
+// Paquetes individuales asociados a productos y su estado logistico.
 import mongoose from 'mongoose';
 
 const packageSchema = new mongoose.Schema({

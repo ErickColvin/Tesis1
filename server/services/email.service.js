@@ -1,3 +1,4 @@
+// Servicio delgado para enviar correos SMTP reutilizando el transporter.
 import nodemailer from 'nodemailer';
 
 const {
